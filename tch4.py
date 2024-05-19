@@ -77,13 +77,21 @@ with tab1:
     df_ajustado = df_petroleo.set_index('data', drop=True)
     resultados = seasonal_decompose(df_ajustado, period=5, model='multiplicative')
 
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(15, 10))
-    resultados.observed.plot(ax=ax1)
-    resultados.trend.plot(ax=ax2)
-    resultados.seasonal.plot(ax=ax3)
-    resultados.resid.plot(ax=ax4)
-    plt.tight_layout()
-    st.pyplot(fig)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Observado")
+        st.line_chart(resultados.observed)
+    with col2:
+        st.write("Tendência")
+        st.line_chart(resultados.trend)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Sazonalidade")
+        st.line_chart(resultados.seasonal)
+    with col2:
+        st.write("Resíduos")
+        st.line_chart(resultados.resid)
 
 with tab2:
     st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
