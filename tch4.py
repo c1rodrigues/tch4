@@ -75,23 +75,20 @@ with tab1:
     A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
     """)
     df_ajustado = df_petroleo.set_index('data', drop=True)
-    resultados = seasonal_decompose(df_ajustado, period=5, model='multiplicative')
+    resultados = seasonal_decompose(df_ajustado, period=12, model='multiplicative')
+
+    fig_obs = px.line(resultados.observed.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Observado")
+    fig_trend = px.line(resultados.trend.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Tendência")
+    fig_seasonal = px.line(resultados.seasonal.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Sazonalidade")
+    fig_resid = px.line(resultados.resid.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Resíduos")
 
     col1, col2 = st.columns(2)
-    with col1:
-        st.write("Observado")
-        st.line_chart(resultados.observed)
-    with col2:
-        st.write("Tendência")
-        st.line_chart(resultados.trend)
+    col1.plotly_chart(fig_obs)
+    col2.plotly_chart(fig_trend)
     
     col1, col2 = st.columns(2)
-    with col1:
-        st.write("Sazonalidade")
-        st.line_chart(resultados.seasonal)
-    with col2:
-        st.write("Resíduos")
-        st.line_chart(resultados.resid)
+    col1.plotly_chart(fig_seasonal)
+    col2.plotly_chart(fig_resid)
 
 with tab2:
     st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
@@ -109,32 +106,28 @@ with tab2:
         st.write(f"\t{key}: {value}")
 
     ma = df_ajustado.rolling(12).mean()
+    fig_ma = px.line(df_ajustado.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Média Móvel (12 Meses)")
+    fig_ma.add_scatter(x=ma.index, y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    df_ajustado.plot(ax=ax, legend=False)
-    ma.plot(ax=ax, legend=False, color='r')
-    plt.tight_layout()
-    st.pyplot(f)
+    st.plotly_chart(fig_ma)
 
     df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    df_ajustado_log.plot(ax=ax, legend=False)
-    ma_log.plot(ax=ax, legend=False, color='r')
-    plt.tight_layout()
-    st.pyplot(f)
+    fig_ma_log = px.line(df_ajustado_log.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Logaritmo e Média Móvel (12 Meses)")
+    fig_ma_log.add_scatter(x=ma_log.index, y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
+
+    st.plotly_chart(fig_ma_log)
 
     df_s = (df_ajustado_log - ma_log).dropna()
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    df_s.plot(ax=ax, legend=False)
-    ma_s.plot(ax=ax, legend=False, color='r')
-    std.plot(ax=ax, legend=False, color='g')
-    plt.tight_layout()
-    st.pyplot(f)
+    fig_s = px.line(df_s.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Série Transformada")
+    fig_s.add_scatter(x=ma_s.index, y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
+    fig_s.add_scatter(x=std.index, y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
+
+    st.plotly_chart(fig_s)
 
     X_s = df_s.preco_petroleo.values
     result_s = adfuller(X_s)
@@ -155,12 +148,11 @@ with tab3:
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    df_diff.plot(ax=ax, legend=False)
-    ma_diff.plot(ax=ax, legend=False, color='r')
-    std_diff.plot(ax=ax, legend=False, color='g')
-    plt.tight_layout()
-    st.pyplot(f)
+    fig_diff = px.line(df_diff.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Diferença da Série")
+    fig_diff.add_scatter(x=ma_diff.index, y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
+    fig_diff.add_scatter(x=std_diff.index, y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
+
+    st.plotly_chart(fig_diff)
 
     X_diff = df_diff.preco_petroleo.dropna().values
     result_diff = adfuller(X_diff)
@@ -175,31 +167,14 @@ with tab3:
     lag_acf = acf(df_diff.dropna(), nlags=25)
     lag_pacf = pacf(df_diff.dropna(), nlags=25)
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    ax.plot(lag_acf)
-    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
-    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
-    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
-    ax.set_title("ACF")
-    plt.tight_layout()
-    st.pyplot(f)
+    fig_acf = px.line(x=range(len(lag_acf)), y=lag_acf, template='plotly_white', title="ACF")
+    fig_acf.add_scatter(x=[-1.96/np.sqrt(len(df_diff.dropna())), 1.96/np.sqrt(len(df_diff.dropna()))], y=[0, 0], mode='lines', line=dict(color='gray', dash='dash'))
 
-    f, ax = plt.subplots(figsize=(15, 5))
-    ax.plot(lag_pacf)
-    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
-    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
-    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
-    ax.set_title("PACF")
-    plt.tight_layout()
-    st.pyplot(f)
+    fig_pacf = px.line(x=range(len(lag_pacf)), y=lag_pacf, template='plotly_white', title="PACF")
+    fig_pacf.add_scatter(x=[-1.96/np.sqrt(len(df_diff.dropna())), 1.96/np.sqrt(len(df_diff.dropna()))], y=[0, 0], mode='lines', line=dict(color='gray', dash='dash'))
 
-    fig, ax = plt.subplots(figsize=(15, 5))
-    plot_acf(df_ajustado.preco_petroleo, lags=25, ax=ax)
-    st.pyplot(fig)
-
-    fig, ax = plt.subplots(figsize=(15, 5))
-    plot_pacf(df_ajustado.preco_petroleo, lags=25, ax=ax)
-    st.pyplot(fig)
+    st.plotly_chart(fig_acf)
+    st.plotly_chart(fig_pacf)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
@@ -224,11 +199,11 @@ with tab4:
     modelo.fit(train_data)
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
-    
-    f, ax = plt.subplots(figsize=(20, 6))
-    modelo.plot(previsao, ax=ax)
-    ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
-    st.pyplot(f)
+
+    fig_forecast = px.line(previsao, x='ds', y='yhat', template='plotly_white', title="Previsão de Preços do Petróleo")
+    fig_forecast.add_scatter(x=test_and_val_data['ds'], y=test_and_val_data['y'], mode='markers', name='Valores Reais', marker=dict(color='red'))
+
+    st.plotly_chart(fig_forecast)
 
     previsao_cols = ['ds', 'yhat']
     valores_reais_cols = ['ds', 'y']
