@@ -27,6 +27,9 @@ warnings.filterwarnings('ignore')
 import streamlit as st
 from prophet import Prophet
 
+# Configuração da página do Streamlit
+st.set_page_config(layout="wide")
+
 # Títulos
 st.write("# Tech-Challenge")
 
