@@ -15,8 +15,6 @@ import plotly.graph_objects as go
 import plotly.express as px
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller, acf, pacf
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.arima.model import ARIMA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
@@ -75,10 +73,16 @@ with tab1:
     df_ajustado = df_petroleo.set_index('data', drop=True)
     resultados = seasonal_decompose(df_ajustado, period=12, model='multiplicative')
 
-    fig_obs = px.line(resultados.observed.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Observado")
-    fig_trend = px.line(resultados.trend.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Tendência")
-    fig_seasonal = px.line(resultados.seasonal.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Sazonalidade")
-    fig_resid = px.line(resultados.resid.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Resíduos")
+    # Convertendo os resultados de decomposição para DataFrames para plotly
+    observed = pd.DataFrame({'data': resultados.observed.index, 'preco_petroleo': resultados.observed.values})
+    trend = pd.DataFrame({'data': resultados.trend.index, 'preco_petroleo': resultados.trend.values})
+    seasonal = pd.DataFrame({'data': resultados.seasonal.index, 'preco_petroleo': resultados.seasonal.values})
+    resid = pd.DataFrame({'data': resultados.resid.index, 'preco_petroleo': resultados.resid.values})
+
+    fig_obs = px.line(observed, x='data', y='preco_petroleo', template='plotly_white', title="Observado")
+    fig_trend = px.line(trend, x='data', y='preco_petroleo', template='plotly_white', title="Tendência")
+    fig_seasonal = px.line(seasonal, x='data', y='preco_petroleo', template='plotly_white', title="Sazonalidade")
+    fig_resid = px.line(resid, x='data', y='preco_petroleo', template='plotly_white', title="Resíduos")
 
     col1, col2 = st.columns(2)
     col1.plotly_chart(fig_obs)
@@ -93,7 +97,7 @@ with tab2:
     st.write("""
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
     """)
-    X = df_ajustado.preco_petroleo.values
+    X = df_ajustado['preco_petroleo'].values
     result = adfuller(X)
 
     st.write("Teste ADF")
@@ -104,16 +108,16 @@ with tab2:
         st.write(f"\t{key}: {value}")
 
     ma = df_ajustado.rolling(12).mean()
-    df_ajustado = df_ajustado.reset_index()
-    fig_ma = px.line(df_ajustado, x='data', y='preco_petroleo', template='plotly_white', title="Média Móvel (12 Meses)")
+    df_ajustado_reset = df_ajustado.reset_index()
+    fig_ma = px.line(df_ajustado_reset, x='data', y='preco_petroleo', template='plotly_white', title="Média Móvel (12 Meses)")
     fig_ma.add_scatter(x=ma.index, y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
 
     st.plotly_chart(fig_ma)
 
-    df_ajustado_log = np.log(df_ajustado.set_index('data'))
+    df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
-
-    fig_ma_log = px.line(df_ajustado_log.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Logaritmo e Média Móvel (12 Meses)")
+    df_ajustado_log_reset = df_ajustado_log.reset_index()
+    fig_ma_log = px.line(df_ajustado_log_reset, x='data', y='preco_petroleo', template='plotly_white', title="Logaritmo e Média Móvel (12 Meses)")
     fig_ma_log.add_scatter(x=ma_log.index, y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
 
     st.plotly_chart(fig_ma_log)
@@ -121,14 +125,14 @@ with tab2:
     df_s = (df_ajustado_log - ma_log).dropna()
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
-
-    fig_s = px.line(df_s.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Série Transformada")
+    df_s_reset = df_s.reset_index()
+    fig_s = px.line(df_s_reset, x='data', y='preco_petroleo', template='plotly_white', title="Série Transformada")
     fig_s.add_scatter(x=ma_s.index, y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig_s.add_scatter(x=std.index, y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
 
     st.plotly_chart(fig_s)
 
-    X_s = df_s.preco_petroleo.values
+    X_s = df_s['preco_petroleo'].values
     result_s = adfuller(X_s)
 
     st.write("Teste ADF")
@@ -146,14 +150,14 @@ with tab3:
     df_diff = df_s.diff(1).dropna()
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
-
-    fig_diff = px.line(df_diff.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Diferença da Série")
+    df_diff_reset = df_diff.reset_index()
+    fig_diff = px.line(df_diff_reset, x='data', y='preco_petroleo', template='plotly_white', title="Diferença da Série")
     fig_diff.add_scatter(x=ma_diff.index, y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig_diff.add_scatter(x=std_diff.index, y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
 
     st.plotly_chart(fig_diff)
 
-    X_diff = df_diff.preco_petroleo.dropna().values
+    X_diff = df_diff['preco_petroleo'].values
     result_diff = adfuller(X_diff)
 
     st.write("Teste ADF")
@@ -163,14 +167,16 @@ with tab3:
     for key, value in result_diff[4].items():
         st.write(f"\t{key}: {value}")
 
-    lag_acf = acf(df_diff.dropna(), nlags=25)
-    lag_pacf = pacf(df_diff.dropna(), nlags=25)
+    lag_acf = acf(df_diff, nlags=25)
+    lag_pacf = pacf(df_diff, nlags=25)
 
-    fig_acf = px.line(x=range(len(lag_acf)), y=lag_acf, template='plotly_white', title="ACF")
-    fig_acf.add_scatter(x=[-1.96/np.sqrt(len(df_diff.dropna())), 1.96/np.sqrt(len(df_diff.dropna()))], y=[0, 0], mode='lines', line=dict(color='gray', dash='dash'))
+    fig_acf = go.Figure()
+    fig_acf.add_trace(go.Scatter(x=np.arange(len(lag_acf)), y=lag_acf, mode='lines+markers'))
+    fig_acf.update_layout(title="ACF", xaxis_title="Lag", yaxis_title="ACF")
 
-    fig_pacf = px.line(x=range(len(lag_pacf)), y=lag_pacf, template='plotly_white', title="PACF")
-    fig_pacf.add_scatter(x=[-1.96/np.sqrt(len(df_diff.dropna())), 1.96/np.sqrt(len(df_diff.dropna()))], y=[0, 0], mode='lines', line=dict(color='gray', dash='dash'))
+    fig_pacf = go.Figure()
+    fig_pacf.add_trace(go.Scatter(x=np.arange(len(lag_pacf)), y=lag_pacf, mode='lines+markers'))
+    fig_pacf.update_layout(title="PACF", xaxis_title="Lag", yaxis_title="PACF")
 
     st.plotly_chart(fig_acf)
     st.plotly_chart(fig_pacf)
