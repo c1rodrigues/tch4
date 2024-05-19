@@ -37,7 +37,7 @@ st.write("# Tech-Challenge")
 df = pd.read_html('http://www.ipeadata.gov.br/ExibeSerie.aspx?module=m&serid=1650971490&oper=view', encoding='UTF-8', decimal=',', thousands='.')
 df_petroleo = df[2]
 df_petroleo.reset_index(drop=True, inplace=True)
-new_header = ['data','preco_petroleo']
+new_header = ['data', 'preco_petroleo']
 df_petroleo = df_petroleo[1:]
 df_petroleo.columns = new_header
 df_petroleo['data'] = pd.to_datetime(df_petroleo['data'])
@@ -57,7 +57,7 @@ with tab0:
     Nesta página, apresentamos a evolução histórica do preço do Petróleo Brent, um dos principais benchmarks mundiais. Desde a Guerra do Golfo em 1990, passando pela crise financeira de 2008 e os impactos das tensões geopolíticas e da pandemia de COVID-19, o gráfico a seguir mostra como eventos globais influenciaram significativamente o mercado de petróleo. Analisando essas flutuações, podemos entender melhor a volatilidade deste mercado e os fatores que impulsionam as mudanças nos preços.
     """)
     df_petroleo_filtered = df_petroleo[(df_petroleo['data'] >= '2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
-    fig = px.line(df_petroleo_filtered, x='data', y='preco_petroleo', template='plotly_white')
+    fig = px.line(df_petroleo_filtered, x='data', y='preco_petroleo', template='plotly_white', width=1000, height=600)
     fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title=" ", yaxis_title="Dolares por Barril")
     st.plotly_chart(fig)
 
@@ -102,7 +102,7 @@ with tab2:
 
     ma = df_ajustado.rolling(12).mean()
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     df_ajustado.plot(ax=ax, legend=False)
     ma.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
@@ -111,7 +111,7 @@ with tab2:
     df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     df_ajustado_log.plot(ax=ax, legend=False)
     ma_log.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
@@ -121,7 +121,7 @@ with tab2:
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     df_s.plot(ax=ax, legend=False)
     ma_s.plot(ax=ax, legend=False, color='r')
     std.plot(ax=ax, legend=False, color='g')
@@ -147,7 +147,7 @@ with tab3:
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     df_diff.plot(ax=ax, legend=False)
     ma_diff.plot(ax=ax, legend=False, color='r')
     std_diff.plot(ax=ax, legend=False, color='g')
@@ -167,7 +167,7 @@ with tab3:
     lag_acf = acf(df_diff.dropna(), nlags=25)
     lag_pacf = pacf(df_diff.dropna(), nlags=25)
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     ax.plot(lag_acf)
     ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
     ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
@@ -176,7 +176,7 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
-    f, ax = plt.subplots()
+    f, ax = plt.subplots(figsize=(15, 5))
     ax.plot(lag_pacf)
     ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
     ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
@@ -185,8 +185,8 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
-    st.pyplot(plot_acf(df_ajustado.preco_petroleo))
-    st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
+    st.pyplot(plot_acf(df_ajustado.preco_petroleo, lags=25, figsize=(15, 5)))
+    st.pyplot(plot_pacf(df_ajustado.preco_petroleo, lags=25, figsize=(15, 5)))
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
