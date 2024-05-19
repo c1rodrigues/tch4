@@ -45,10 +45,14 @@ df_petroleo.isnull().sum()
 df_petroleo.info()
 
 # Criando abas na aplicação
-tab0, tab1, tab2, tab3, tab4 = st.tabs(['pag1', 'pag2', 'pag3', 'pag4', 'pag5'])
+tab0, tab1, tab2, tab3, tab4 = st.tabs(['Evolução do Preço do Petróleo Brent', 'Análise de Tendências e Sazonalidade', 'Teste de Estacionaridade e Transformações de Série Temporal', 'Análise de Autocorrelação e Autocorrelação Parcial', 'Previsão de Preços com Prophet'])
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 with tab0:
+    st.subheader("Evolução do Preço do Petróleo Brent")
+    st.write("""
+    Nesta página, apresentamos a evolução histórica do preço do Petróleo Brent, um dos principais benchmarks mundiais. Desde a Guerra do Golfo em 1990, passando pela crise financeira de 2008 e os impactos das tensões geopolíticas e da pandemia de COVID-19, o gráfico a seguir mostra como eventos globais influenciaram significativamente o mercado de petróleo. Analisando essas flutuações, podemos entender melhor a volatilidade deste mercado e os fatores que impulsionam as mudanças nos preços.
+    """)
     df_petroleo_filtered = df_petroleo[(df_petroleo['data'] >= '2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
     fig = px.line(df_petroleo_filtered, x='data', y='preco_petroleo', template='plotly_white')
     fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title=" ", yaxis_title="Dolares por Barril")
@@ -74,6 +78,10 @@ with tab0:
     st.pyplot(fig)
 
 with tab1:
+    st.subheader("Análise de Tendências e Sazonalidade")
+    st.write("""
+    A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
+    """)
     X = df_ajustado.preco_petroleo.values
     result = adfuller(X)
 
@@ -123,6 +131,10 @@ with tab1:
         st.write(f"\t{key}: {value}")
 
 with tab2:
+    st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
+    st.write("""
+    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
+    """)
     df_diff = df_s.diff(1)
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
@@ -169,6 +181,10 @@ with tab2:
     st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
 
 with tab3:
+    st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
+    st.write("""
+    A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
+    """)
     df = df_petroleo[(df_petroleo['data'] > '2014-01-01') & (df_petroleo['data'] <= '2024-01-01')]
     df = df.reset_index(drop=True)
     df = df.rename(columns={'data': 'ds', 'preco_petroleo': 'y'})
