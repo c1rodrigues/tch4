@@ -11,10 +11,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
-import seaborn as sns
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
@@ -58,7 +56,7 @@ with tab0:
     """)
     df_petroleo_filtered = df_petroleo[(df_petroleo['data'] >= '2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
     fig = px.line(df_petroleo_filtered, x='data', y='preco_petroleo', template='plotly_white', width=1000, height=600)
-    fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title=" ", yaxis_title="Dolares por Barril")
+    fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title="Data", yaxis_title="Dólares por Barril")
     st.plotly_chart(fig)
 
     st.write("""
@@ -106,12 +104,13 @@ with tab2:
         st.write(f"\t{key}: {value}")
 
     ma = df_ajustado.rolling(12).mean()
-    fig_ma = px.line(df_ajustado.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Média Móvel (12 Meses)")
+    df_ajustado = df_ajustado.reset_index()
+    fig_ma = px.line(df_ajustado, x='data', y='preco_petroleo', template='plotly_white', title="Média Móvel (12 Meses)")
     fig_ma.add_scatter(x=ma.index, y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
 
     st.plotly_chart(fig_ma)
 
-    df_ajustado_log = np.log(df_ajustado)
+    df_ajustado_log = np.log(df_ajustado.set_index('data'))
     ma_log = df_ajustado_log.rolling(12).mean()
 
     fig_ma_log = px.line(df_ajustado_log.reset_index(), x='data', y='preco_petroleo', template='plotly_white', title="Logaritmo e Média Móvel (12 Meses)")
@@ -144,7 +143,7 @@ with tab3:
     st.write("""
     A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
     """)
-    df_diff = df_s.diff(1)
+    df_diff = df_s.diff(1).dropna()
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
