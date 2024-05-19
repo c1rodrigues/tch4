@@ -66,6 +66,11 @@ with tab0:
     Depois disso temos a queda de Abril de 2020, decorrente do início da pandemia do COVID-19 e os dois picos de Março e Julho de 2022 decorrentes da Guerra entre Ucrânia e Rússia.
     """)
 
+with tab1:
+    st.subheader("Análise de Tendências e Sazonalidade")
+    st.write("""
+    A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
+    """)
     df_ajustado = df_petroleo.set_index('data', drop=True)
     resultados = seasonal_decompose(df_ajustado, period=5, model='multiplicative')
 
@@ -77,10 +82,10 @@ with tab0:
     plt.tight_layout()
     st.pyplot(fig)
 
-with tab1:
-    st.subheader("Análise de Tendências e Sazonalidade")
+with tab2:
+    st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
     st.write("""
-    A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
+    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
     """)
     X = df_ajustado.preco_petroleo.values
     result = adfuller(X)
@@ -130,10 +135,10 @@ with tab1:
     for key, value in result_s[4].items():
         st.write(f"\t{key}: {value}")
 
-with tab2:
-    st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
+with tab3:
+    st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
     st.write("""
-    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
+    A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
     """)
     df_diff = df_s.diff(1)
     ma_diff = df_diff.rolling(12).mean()
@@ -180,10 +185,10 @@ with tab2:
     st.pyplot(plot_acf(df_ajustado.preco_petroleo))
     st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
 
-with tab3:
-    st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
+with tab4:
+    st.subheader("Previsão de Preços com Prophet")
     st.write("""
-    A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
+    A previsão de preços do petróleo é uma tarefa complexa, mas crucial para decisões econômicas e estratégicas. Utilizando o modelo Prophet, desenvolvemos previsões baseadas em dados históricos ajustados. Nesta página, mostramos como o Prophet pode capturar a sazonalidade diária e realizar previsões para períodos futuros. Além disso, comparamos as previsões com os valores reais para calcular a precisão do modelo, usando a métrica MAPE (Erro Percentual Absoluto Médio).
     """)
     df = df_petroleo[(df_petroleo['data'] > '2014-01-01') & (df_petroleo['data'] <= '2024-01-01')]
     df = df.reset_index(drop=True)
