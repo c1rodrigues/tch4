@@ -6,6 +6,6 @@ matplotlib
 plotly
 seaborn
 statsmodels
-sklearn
+scikit-learn
 warnings
 prophet
