@@ -57,8 +57,6 @@ df_petroleo.isnull().sum()
 
 df_petroleo.info()
 
-df_petroleo[(df_petroleo['data'] >='2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
-
 # criando abas na aplicação
 tab0, tab1, tab2, tab3, tab4 = st.tabs(['pag1', 'pag2', 'pag3',
                                         'pag4', 'pag5'])
@@ -67,6 +65,10 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
 with tab0:
+
+    df_petroleo[(df_petroleo['data'] >='2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
+
+
     fig = px.line(df_petroleo, x = 'data', y = 'preco_petroleo', template='plotly_white')
     fig.update_layout( title="Evoluçaõ do Petróleo Brent",
         xaxis_title=" ",
