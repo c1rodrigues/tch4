@@ -1,0 +1,11 @@
+streamlit
+sqlalchemy
+numpy
+pandas
+matplotlib
+plotly
+seaborn
+statsmodels
+sklearn
+warnings
+prophet
