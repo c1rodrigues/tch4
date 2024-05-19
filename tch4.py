@@ -185,8 +185,13 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
-    st.pyplot(plot_acf(df_ajustado.preco_petroleo, lags=25, figsize=(15, 5)))
-    st.pyplot(plot_pacf(df_ajustado.preco_petroleo, lags=25, figsize=(15, 5)))
+    fig, ax = plt.subplots(figsize=(15, 5))
+    plot_acf(df_ajustado.preco_petroleo, lags=25, ax=ax)
+    st.pyplot(fig)
+
+    fig, ax = plt.subplots(figsize=(15, 5))
+    plot_pacf(df_ajustado.preco_petroleo, lags=25, ax=ax)
+    st.pyplot(fig)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
