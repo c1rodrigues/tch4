@@ -231,7 +231,6 @@ with tab3:
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
     st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
-
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
     st.write("""
