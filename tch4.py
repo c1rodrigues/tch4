@@ -142,20 +142,22 @@ with tab2:
     O gráfico a seguir mostra a série temporal original e a média móvel de 12 períodos. A média móvel ajuda a suavizar as flutuações de curto prazo e a destacar a tendência de longo prazo.
     """)
     ma = df_ajustado.rolling(12).mean()
-    fig = px.line(df_ajustado.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma.index, y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.update_layout(title="Série Temporal Original e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_ajustado.plot(ax=ax, legend=False)
+    ma.plot(ax=ax, legend=False, color='r')
+    ax.set_title("Série Temporal Original e Média Móvel")
+    st.pyplot(fig)
 
     st.write("""
     Aplicamos uma transformação logarítmica para estabilizar a variância. A série log-transformada é então suavizada com uma média móvel de 12 períodos.
     """)
     df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
-    fig = px.line(df_ajustado_log.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_log.index, y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.update_layout(title="Série Log-Transformada e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_ajustado_log.plot(ax=ax, legend=False)
+    ma_log.plot(ax=ax, legend=False, color='r')
+    ax.set_title("Série Log-Transformada e Média Móvel")
+    st.pyplot(fig)
 
     st.write("""
     A série temporal log-transformada e suavizada é subtraída da série log-transformada original, resultando em uma série estacionária.
@@ -163,11 +165,12 @@ with tab2:
     df_s = (df_ajustado_log - ma_log).dropna()
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
-    fig = px.line(df_s.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_s.index, y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.add_scatter(x=std.index, y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
-    fig.update_layout(title="Série Estacionária com Média Móvel e Desvio Padrão", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_s.plot(ax=ax, legend=False)
+    ma_s.plot(ax=ax, legend=False, color='r')
+    std.plot(ax=ax, legend=False, color='g')
+    ax.set_title("Série Estacionária com Média Móvel e Desvio Padrão")
+    st.pyplot(fig)
 
     st.write("""
     Realizamos novamente o teste de Dickey-Fuller Aumentado na série transformada e suavizada para confirmar a estacionaridade.
@@ -195,11 +198,12 @@ with tab3:
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    fig = px.line(df_diff.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_diff.index, y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.add_scatter(x=std_diff.index, y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
-    fig.update_layout(title="Série Temporal Diferenciada com Média Móvel e Desvio Padrão", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_diff.plot(ax=ax, legend=False)
+    ma_diff.plot(ax=ax, legend=False, color='r')
+    std_diff.plot(ax=ax, legend=False, color='g')
+    ax.set_title("Série Temporal Diferenciada com Média Móvel e Desvio Padrão")
+    st.pyplot(fig)
 
     st.write("""
     Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
@@ -217,36 +221,30 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf = acf(df_diff.dropna(), nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_acf)), y=lag_acf))
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_acf(df_diff.dropna(), ax=ax)
+    st.pyplot(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf = pacf(df_diff.dropna(), nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_pacf)), y=lag_pacf))
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_pacf(df_diff.dropna(), ax=ax)
+    st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
     """)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(acf(df_ajustado.preco_petroleo, nlags=25))), y=acf(df_ajustado.preco_petroleo, nlags=25)))
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_acf(df_ajustado.preco_petroleo, ax=ax)
+    st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(pacf(df_ajustado.preco_petroleo, nlags=25))), y=pacf(df_ajustado.preco_petroleo, nlags=25)))
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_pacf(df_ajustado.preco_petroleo, ax=ax)
+    st.pyplot(fig)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
@@ -274,10 +272,10 @@ with tab4:
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
 
-    fig = px.line(previsao, x='ds', y='yhat', template=plotly_template)
-    fig.add_scatter(x=test_and_val_data['ds'], y=test_and_val_data['y'], mode='markers', name='Valores Reais', marker=dict(color='red'))
-    fig.update_layout(title="Previsão de Preços com Prophet", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    modelo.plot(previsao, ax=ax)
+    ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
+    st.pyplot(fig)
 
     previsao_cols = ['ds', 'yhat']
     valores_reais_cols = ['ds', 'y']
@@ -300,10 +298,12 @@ with tab5:
     modelo = ARIMA(df_diff, order=(2, 1, 2))  # (p, d, q)
     resultado_AR = modelo.fit()
 
-    fig = px.line(df_diff.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=resultado_AR.fittedvalues.index, y=resultado_AR.fittedvalues, mode='lines', name='Valores Ajustados pelo Modelo', line=dict(color='red'))
-    fig.update_layout(title='RSS: %.4f' % sum((resultado_AR.fittedvalues - df_diff['preco_petroleo'])**2), xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_diff.plot(ax=ax, label='Valores Diferenciados')
+    resultado_AR.fittedvalues.plot(ax=ax, color='red', label='Valores Ajustados pelo Modelo')
+    ax.set_title('RSS: %.4f' % sum((resultado_AR.fittedvalues - df_diff['preco_petroleo'])**2))
+    ax.legend()
+    st.pyplot(fig)
 
     # Verifica pontos nulos
     st.write("Pontos nulos no dataframe:")
