@@ -50,6 +50,8 @@ df_petroleo.info()
 tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(['Evolução do Preço do Petróleo Brent', 'Análise de Tendências e Sazonalidade', 'Teste de Estacionaridade e Transformações de Série Temporal', 'Análise de Autocorrelação e Autocorrelação Parcial', 'Previsão de Preços com Prophet', 'Modelagem ARIMA','Notebook'])
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
+st.set_page_config(layout="wide")
+
 # Estilo dos gráficos
 plt.style.use('ggplot')
 fig_width, fig_height = (10, 5)
