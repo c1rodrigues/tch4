@@ -52,7 +52,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
 plt.style.use('ggplot')
-fig_width, fig_height = (7, 5)
+fig_width, fig_height = (10, 5)
 
 with tab0:
     st.subheader("Evolução do Preço do Petróleo Brent")
@@ -100,7 +100,7 @@ with tab1:
     st.write("""
     **Terceiro Gráfico (Sazonalidade):** Este gráfico mostra os padrões sazonais no preço do petróleo. A sazonalidade captura as flutuações que ocorrem em intervalos regulares devido a fatores recorrentes, como variações sazonais na demanda ou oferta. Podemos ver que o preço do petróleo tende a seguir um padrão repetitivo ao longo do tempo.
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots(figsize=(fig_width*10, fig_height))
     resultados.seasonal.plot(ax=ax)
     ax.set_title("Sazonalidade dos Preços do Petróleo Brent")
     st.pyplot(fig)
