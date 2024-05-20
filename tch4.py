@@ -168,10 +168,14 @@ with tab3:
     st.write("""
     A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
     """)
+
     df_diff = df_s.diff(1)
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
+    st.write("""
+    O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
+    """)
     f, ax = plt.subplots()
     df_diff.plot(ax=ax, legend=False)
     ma_diff.plot(ax=ax, legend=False, color='r')
@@ -179,6 +183,9 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
+    st.write("""
+    Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
+    """)
     X_diff = df_diff.preco_petroleo.dropna().values
     result_diff = adfuller(X_diff)
 
@@ -189,9 +196,10 @@ with tab3:
     for key, value in result_diff[4].items():
         st.write(f"\t{key}: {value}")
 
+    st.write("""
+    O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
+    """)
     lag_acf = acf(df_diff.dropna(), nlags=25)
-    lag_pacf = pacf(df_diff.dropna(), nlags=25)
-
     f, ax = plt.subplots()
     ax.plot(lag_acf)
     ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
@@ -201,6 +209,10 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
+    st.write("""
+    O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
+    """)
+    lag_pacf = pacf(df_diff.dropna(), nlags=25)
     f, ax = plt.subplots()
     ax.plot(lag_pacf)
     ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
@@ -210,7 +222,14 @@ with tab3:
     plt.tight_layout()
     st.pyplot(f)
 
+    st.write("""
+    Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
+    """)
     st.pyplot(plot_acf(df_ajustado.preco_petroleo))
+
+    st.write("""
+    Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
+    """)
     st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
 
 with tab4:
