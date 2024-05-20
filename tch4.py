@@ -124,7 +124,7 @@ with tab2:
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais.
     """)
 
-    X = df_ajustado.preco_petroleo.values
+    X = df_ajustado['preco_petroleo'].values
     result = adfuller(X)
 
     st.write("Teste ADF")
@@ -137,9 +137,8 @@ with tab2:
     st.write("""
     O gráfico a seguir mostra a série temporal original e a média móvel de 12 períodos. A média móvel ajuda a suavizar as flutuações de curto prazo e a destacar a tendência de longo prazo.
     """)
-    ma = df_ajustado.rolling(12).mean()
-    df_ajustado.reset_index(inplace=True)
-    ma.reset_index(inplace=True)
+    ma = df_ajustado.rolling(12).mean().reset_index()
+    df_ajustado = df_ajustado.reset_index()
     fig = px.line(df_ajustado, x='data', y='preco_petroleo', template=plotly_template)
     fig.add_scatter(x=ma['data'], y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig.update_layout(title="Série Temporal Original e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
@@ -149,9 +148,8 @@ with tab2:
     Aplicamos uma transformação logarítmica para estabilizar a variância. A série log-transformada é então suavizada com uma média móvel de 12 períodos.
     """)
     df_ajustado_log = np.log(df_ajustado.set_index('data')['preco_petroleo'])
-    ma_log = df_ajustado_log.rolling(12).mean()
+    ma_log = df_ajustado_log.rolling(12).mean().reset_index()
     df_ajustado_log = df_ajustado_log.reset_index()
-    ma_log = ma_log.reset_index()
     fig = px.line(df_ajustado_log, x='data', y='preco_petroleo', template=plotly_template)
     fig.add_scatter(x=ma_log['data'], y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig.update_layout(title="Série Log-Transformada e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
@@ -161,8 +159,8 @@ with tab2:
     A série temporal log-transformada e suavizada é subtraída da série log-transformada original, resultando em uma série estacionária.
     """)
     df_s = (df_ajustado_log.set_index('data') - ma_log.set_index('data')).dropna().reset_index()
-    ma_s = df_s.rolling(12).mean()
-    std = df_s.rolling(12).std()
+    ma_s = df_s.rolling(12).mean().reset_index()
+    std = df_s.rolling(12).std().reset_index()
     fig = px.line(df_s, x='data', y='preco_petroleo', template=plotly_template)
     fig.add_scatter(x=ma_s['data'], y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig.add_scatter(x=std['data'], y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
@@ -172,7 +170,7 @@ with tab2:
     st.write("""
     Realizamos novamente o teste de Dickey-Fuller Aumentado na série transformada e suavizada para confirmar a estacionaridade.
     """)
-    X_s = df_s.preco_petroleo.values
+    X_s = df_s['preco_petroleo'].values
     result_s = adfuller(X_s)
 
     st.write("Teste ADF")
@@ -188,16 +186,13 @@ with tab3:
     A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
     """)
 
-    df_diff = df_s.diff(1)
-    ma_diff = df_diff.rolling(12).mean()
-    std_diff = df_diff.rolling(12).std()
+    df_diff = df_s.diff(1).dropna().reset_index()
+    ma_diff = df_diff.rolling(12).mean().reset_index()
+    std_diff = df_diff.rolling(12).std().reset_index()
 
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    df_diff.reset_index(inplace=True)
-    ma_diff.reset_index(inplace=True)
-    std_diff.reset_index(inplace=True)
     fig = px.line(df_diff, x='data', y='preco_petroleo', template=plotly_template)
     fig.add_scatter(x=ma_diff['data'], y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     fig.add_scatter(x=std_diff['data'], y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
@@ -207,7 +202,7 @@ with tab3:
     st.write("""
     Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
     """)
-    X_diff = df_diff.preco_petroleo.dropna().values
+    X_diff = df_diff['preco_petroleo'].dropna().values
     result_diff = adfuller(X_diff)
 
     st.write("Teste ADF")
@@ -220,7 +215,7 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf = acf(df_diff.dropna()['preco_petroleo'], nlags=25)
+    lag_acf = acf(df_diff['preco_petroleo'], nlags=25)
     fig = go.Figure()
     fig.add_trace(go.Bar(x=np.arange(len(lag_acf)), y=lag_acf))
     fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
@@ -229,7 +224,7 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf = pacf(df_diff.dropna()['preco_petroleo'], nlags=25)
+    lag_pacf = pacf(df_diff['preco_petroleo'], nlags=25)
     fig = go.Figure()
     fig.add_trace(go.Bar(x=np.arange(len(lag_pacf)), y=lag_pacf))
     fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
