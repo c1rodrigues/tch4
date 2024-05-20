@@ -74,7 +74,19 @@ with tab0:
 with tab1:
     st.subheader("Análise de Tendências e Sazonalidade")
     st.write("""
-    A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
+    Nesta página, focamos na análise de tendências e sazonalidade do preço do petróleo Brent. A análise de séries temporais nos permite decompor a série em componentes que revelam padrões ocultos nos dados. Utilizando a decomposição sazonal, podemos identificar as tendências subjacentes, os padrões sazonais e os resíduos.
+
+    A imagem a seguir ilustra a decomposição do preço do petróleo Brent:
+    
+    - **Primeiro Gráfico (Observado):** Este gráfico mostra os preços observados do petróleo Brent de janeiro de 2022 a maio de 2024. Aqui, podemos ver claramente as flutuações no preço do petróleo durante esse período, refletindo eventos e influências econômicas e geopolíticas.
+    
+    - **Segundo Gráfico (Tendência):** Este gráfico mostra a tendência subjacente dos preços do petróleo. Ele suaviza as flutuações diárias para revelar a direção geral do mercado ao longo do tempo. Podemos observar períodos de aumento e queda prolongados, que podem ser atribuídos a mudanças estruturais no mercado, como políticas de produção de petróleo ou mudanças na demanda global.
+    
+    - **Terceiro Gráfico (Sazonalidade):** Este gráfico mostra os padrões sazonais no preço do petróleo. A sazonalidade captura as flutuações que ocorrem em intervalos regulares devido a fatores recorrentes, como variações sazonais na demanda ou oferta. Podemos ver que o preço do petróleo tende a seguir um padrão repetitivo ao longo do tempo.
+    
+    - **Quarto Gráfico (Resíduos):** Este gráfico mostra os resíduos, ou seja, as variações que não são explicadas pela tendência ou sazonalidade. Os resíduos representam a componente aleatória dos dados, incluindo os choques imprevisíveis no mercado de petróleo, como desastres naturais ou eventos geopolíticos inesperados.
+    
+    Através dessa análise de decomposição, podemos entender melhor como diferentes componentes contribuem para a variação do preço do petróleo Brent. Essa visão é crucial para investidores, economistas e formuladores de políticas, permitindo-lhes tomar decisões informadas baseadas em uma compreensão profunda dos padrões históricos e das dinâmicas de mercado.
     """)
     df_ajustado = df_petroleo[(df_petroleo['data'] > '2022-01-01') & (df_petroleo['data'] <= '2024-05-01')]
     df_ajustado = df_ajustado.set_index('data', drop=True)
