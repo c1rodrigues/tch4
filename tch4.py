@@ -162,22 +162,23 @@ with tab3:
     """)
 
     df_diff = df_s.diff(1)
-    df_diff = df_diff.dropna()
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    fig = px.line(df_diff, x=df_diff.index, y='preco_petroleo', title='Série Temporal Diferenciada com Média Móvel e Desvio Padrão', width=fig_width*100, height=fig_height*100)
-    fig.add_scatter(x=df_diff.index, y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.add_scatter(x=df_diff.index, y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    df_diff.plot(ax=ax, legend=False)
+    ma_diff.plot(ax=ax, legend=False, color='r')
+    std_diff.plot(ax=ax, legend=False, color='g')
+    ax.set_title("Série Temporal Diferenciada com Média Móvel e Desvio Padrão")
+    st.pyplot(fig)
 
     st.write("""
     Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
     """)
-    X_diff = df_diff.preco_petroleo.values
+    X_diff = df_diff.preco_petroleo.dropna().values
     result_diff = adfuller(X_diff)
 
     st.write("Teste ADF")
@@ -190,20 +191,40 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf_values = acf(df_diff, nlags=25)
-    fig = px.line(x=range(len(lag_acf_values)), y=lag_acf_values, title='ACF (Autocorrelação)', width=fig_width*100, height=fig_height*100)
-    fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    st.plotly_chart(fig)
+    lag_acf = acf(df_diff.dropna(), nlags=25)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    ax.plot(lag_acf)
+    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.set_title("ACF (Autocorrelação)")
+    st.pyplot(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf_values = pacf(df_diff, nlags=25)
-    fig = px.line(x=range(len(lag_pacf_values)), y=lag_pacf_values, title='PACF (Autocorrelação Parcial)', width=fig_width*100, height=fig_height*100)
-    fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    st.plotly_chart(fig)
+    lag_pacf = pacf(df_diff.dropna(), nlags=25)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    ax.plot(lag_pacf)
+    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.set_title("PACF (Autocorrelação Parcial)")
+    st.pyplot(fig)
+
+    st.write("""
+    Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
+    """)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_acf(df_ajustado.preco_petroleo, ax=ax)
+    st.pyplot(fig)
+
+    st.write("""
+    Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
+    """)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_pacf(df_ajustado.preco_petroleo, ax=ax)
+    st.pyplot(fig)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
@@ -231,9 +252,10 @@ with tab4:
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
 
-    fig = px.line(previsao, x='ds', y='yhat', title='Previsão de Preços do Petróleo com Prophet', width=fig_width*100, height=fig_height*100)
-    fig.add_scatter(x=test_and_val_data['ds'], y=test_and_val_data['y'], mode='markers', name='Valores Reais', marker=dict(color='red'))
-    st.plotly_chart(fig)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    modelo.plot(previsao, ax=ax)
+    ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
+    st.pyplot(fig)
 
     previsao_cols = ['ds', 'yhat']
     valores_reais_cols = ['ds', 'y']
