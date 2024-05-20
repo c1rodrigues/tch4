@@ -51,7 +51,9 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 with tab0:
     st.subheader("Evolução do Preço do Petróleo Brent")
     st.write("""
-    Nesta página, apresentamos a evolução histórica do preço do Petróleo Brent, um dos principais benchmarks mundiais. Desde a Guerra do Golfo em 1990, passando pela crise financeira de 2008 e os impactos das tensões geopolíticas e da pandemia de COVID-19, o gráfico a seguir mostra como eventos globais influenciaram significativamente o mercado de petróleo. Analisando essas flutuações, podemos entender melhor a volatilidade deste mercado e os fatores que impulsionam as mudanças nos preços.
+    O preço do Petróleo Brent, um dos principais benchmarks globais para o petróleo, tem uma história rica e tumultuada. Desde o início da década de 1990, vimos flutuações significativas que refletem eventos geopolíticos e econômicos. Em outubro de 1990, a invasão do Kuwait pelo Iraque desencadeou uma subida acentuada nos preços. Mais tarde, em julho de 2008, os preços dispararam novamente devido a tensões envolvendo o retorno do petróleo iraniano aos mercados globais e as considerações sobre a proibição das importações de petróleo russo pelos EUA e aliados europeus.
+    
+    O gráfico abaixo ilustra essas e outras variações, como a queda brusca em outubro de 2018 após o assassinato do jornalista saudita Jamal Khashoggi e o impacto da pandemia de COVID-19 em abril de 2020. Mais recentemente, a guerra entre Ucrânia e Rússia causou picos nos preços em março e julho de 2022. Este panorama nos ajuda a entender como os eventos globais influenciam o mercado de petróleo.
     """)
     df_petroleo_filtered = df_petroleo[(df_petroleo['data'] >= '2014-01-01') & (df_petroleo['data'] < '2024-01-01')]
     fig = px.line(df_petroleo_filtered, x='data', y='preco_petroleo', template='plotly_white', width=1000, height=600)
@@ -59,17 +61,22 @@ with tab0:
     st.plotly_chart(fig)
 
     st.write("""
-    Primeira grande alta foi em Outubro de 1990. Essa alta se deu por conta da guerra entre Iraque e Kwait.
-    A segunda grande alta se deu em Julho de 2008 devido a atrasos no potencial retorno do petróleo iraniano aos mercados globais e a considerações dos Estados Unidos e aliados europeus de proibir importações de petróleo russo.
-    As negociações para reviver o acordo nuclear de 2015 do Irã com as potências mundiais produziram a queda do valor do barril do petróleo.
-    Em Outubro 2018 vemos uma queda brusca decorrente do assassinato do jornalista saudita Jamal Khashoggi, crítico do príncipe-herdeiro Mohamed bin Salman e exilado nos Estados Unidos.
-    Depois disso temos a queda de Abril de 2020, decorrente do início da pandemia do COVID-19 e os dois picos de Março e Julho de 2022 decorrentes da Guerra entre Ucrânia e Rússia.
+    **Principais Eventos:**
+    - **Outubro de 1990:** Guerra entre Iraque e Kuwait.
+    - **Julho de 2008:** Tensão envolvendo o petróleo iraniano e russo.
+    - **Outubro de 2018:** Assassinato de Jamal Khashoggi.
+    - **Abril de 2020:** Impacto da pandemia de COVID-19.
+    - **Março e Julho de 2022:** Guerra entre Ucrânia e Rússia.
     """)
 
 with tab1:
     st.subheader("Análise de Tendências e Sazonalidade")
     st.write("""
-    A análise de tendências e sazonalidade nos permite decompor o preço do petróleo em seus componentes fundamentais. Utilizando a decomposição sazonal, identificamos as tendências subjacentes e os padrões sazonais que afetam os preços ao longo do tempo. Esta abordagem revela as flutuações cíclicas e ajuda a prever futuros comportamentos do mercado, fornecendo uma visão mais clara sobre a dinâmica de longo prazo do petróleo Brent.
+    A decomposição sazonal é uma ferramenta poderosa para entender os componentes subjacentes de uma série temporal. No caso do preço do petróleo Brent, a decomposição nos permite isolar a tendência de longo prazo, os padrões sazonais e as flutuações residuais.
+    
+    A tendência nos mostra a direção geral do mercado ao longo do tempo, enquanto a sazonalidade revela padrões recorrentes que ocorrem em intervalos regulares. Os resíduos representam a variação que não pode ser explicada pela tendência ou sazonalidade e podem indicar eventos inesperados ou anomalias no mercado.
+    
+    A análise abaixo detalha esses componentes, oferecendo uma visão clara de como cada um contribui para a evolução do preço do petróleo Brent.
     """)
     df_ajustado = df_petroleo.set_index('data', drop=True)
     resultados = seasonal_decompose(df_ajustado, period=12, model='multiplicative')
@@ -89,7 +96,9 @@ with tab1:
 with tab2:
     st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
     st.write("""
-    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
+    Antes de aplicar modelos de séries temporais, é crucial verificar se a série é estacionária. Uma série é considerada estacionária se suas propriedades estatísticas, como média e variância, permanecem constantes ao longo do tempo. Para isso, utilizamos o Teste ADF (Dickey-Fuller Aumentado).
+    
+    No caso do preço do petróleo Brent, aplicamos transformações como a diferenciação e o logaritmo para estabilizar a variância e tornar a série mais próxima da estacionaridade. Abaixo, apresentamos os resultados do Teste ADF e visualizações das transformações aplicadas.
     """)
     X = df_ajustado['preco_petroleo'].values
     result = adfuller(X)
@@ -142,7 +151,9 @@ with tab2:
 with tab3:
     st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
     st.write("""
-    A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
+    A autocorrelação (ACF) e a autocorrelação parcial (PACF) são ferramentas essenciais para entender a relação entre os valores passados e presentes de uma série temporal. No contexto do preço do petróleo Brent, essas análises nos ajudam a identificar a presença de padrões ou ciclos que podem ser utilizados na modelagem preditiva.
+    
+    O gráfico ACF mostra a correlação de uma série com suas próprias versões defasadas ao longo do tempo, enquanto o gráfico PACF ajuda a identificar a ordem apropriada de um modelo ARIMA (Autoregressive Integrated Moving Average). Abaixo, apresentamos os gráficos ACF e PACF para o preço do petróleo Brent, destacando os lags significativos.
     """)
     df_diff = df_s.diff(1).dropna()
     ma_diff = df_diff.rolling(12).mean()
@@ -192,7 +203,9 @@ with tab3:
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
     st.write("""
-    A previsão de preços do petróleo é uma tarefa complexa, mas crucial para decisões econômicas e estratégicas. Utilizando o modelo Prophet, desenvolvemos previsões baseadas em dados históricos ajustados. Nesta página, mostramos como o Prophet pode capturar a sazonalidade diária e realizar previsões para períodos futuros. Além disso, comparamos as previsões com os valores reais para calcular a precisão do modelo, usando a métrica MAPE (Erro Percentual Absoluto Médio).
+    Prever o preço do petróleo é uma tarefa desafiadora devido à sua natureza volátil e dependente de múltiplos fatores globais. Utilizamos o modelo Prophet, desenvolvido pelo Facebook, que é particularmente eficaz para séries temporais com fortes componentes sazonais e múltiplos efeitos de feriados.
+    
+    O Prophet permite a captura da sazonalidade diária, semanal e anual, proporcionando previsões robustas mesmo com dados históricos relativamente curtos. Abaixo, apresentamos as previsões geradas pelo Prophet para o preço do petróleo Brent, comparando com os valores reais para avaliar a precisão do modelo através do MAPE (Erro Percentual Absoluto Médio).
     """)
     df = df_petroleo[(df_petroleo['data'] > '2014-01-01') & (df_petroleo['data'] <= '2024-01-01')]
     df = df.reset_index(drop=True)
