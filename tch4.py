@@ -51,7 +51,7 @@ tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(['Evolução do Preço do Petróleo
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
-plt.style.use('seaborn-white')
+plt.style.use('ggplot')
 fig_width, fig_height = (10, 5)
 
 with tab0:
