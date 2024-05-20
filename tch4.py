@@ -89,28 +89,36 @@ with tab1:
     st.write("""
     **Primeiro Gráfico (Observado):** Este gráfico mostra os preços observados do petróleo Brent de janeiro de 2022 a maio de 2024. Aqui, podemos ver claramente as flutuações no preço do petróleo durante esse período, refletindo eventos e influências econômicas e geopolíticas.
     """)
-    fig = px.line(df_ajustado.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
+    observed_df = resultados.observed.reset_index()
+    observed_df.columns = ['data', 'preco_petroleo']
+    fig = px.line(observed_df, x='data', y='preco_petroleo', template=plotly_template)
     fig.update_layout(title="Preços Observados do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     **Segundo Gráfico (Tendência):** Este gráfico mostra a tendência subjacente dos preços do petróleo. Ele suaviza as flutuações diárias para revelar a direção geral do mercado ao longo do tempo. Podemos observar períodos de aumento e queda prolongados, que podem ser atribuídos a mudanças estruturais no mercado, como políticas de produção de petróleo ou mudanças na demanda global.
     """)
-    fig = px.line(resultados.trend.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
+    trend_df = resultados.trend.reset_index()
+    trend_df.columns = ['data', 'preco_petroleo']
+    fig = px.line(trend_df, x='data', y='preco_petroleo', template=plotly_template)
     fig.update_layout(title="Tendência dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     **Terceiro Gráfico (Sazonalidade):** Este gráfico mostra os padrões sazonais no preço do petróleo. A sazonalidade captura as flutuações que ocorrem em intervalos regulares devido a fatores recorrentes, como variações sazonais na demanda ou oferta. Podemos ver que o preço do petróleo tende a seguir um padrão repetitivo ao longo do tempo.
     """)
-    fig = px.line(resultados.seasonal.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
+    seasonal_df = resultados.seasonal.reset_index()
+    seasonal_df.columns = ['data', 'preco_petroleo']
+    fig = px.line(seasonal_df, x='data', y='preco_petroleo', template=plotly_template)
     fig.update_layout(title="Sazonalidade dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     **Quarto Gráfico (Resíduos):** Este gráfico mostra os resíduos, ou seja, as variações que não são explicadas pela tendência ou sazonalidade. Os resíduos representam a componente aleatória dos dados, incluindo os choques imprevisíveis no mercado de petróleo, como desastres naturais ou eventos geopolíticos inesperados.
     """)
-    fig = px.line(resultados.resid.reset_index(), x='data', y='preco_petroleo', template=plotly_template)
+    resid_df = resultados.resid.reset_index()
+    resid_df.columns = ['data', 'preco_petroleo']
+    fig = px.line(resid_df, x='data', y='preco_petroleo', template=plotly_template)
     fig.update_layout(title="Resíduos dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
