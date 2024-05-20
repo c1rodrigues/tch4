@@ -51,7 +51,7 @@ tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(['Evolução do Preço do Petróleo
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
-plt.style.use('seaborn-whitegrid')
+plt.style.use('seaborn-white')
 fig_width, fig_height = (10, 5)
 
 with tab0:
@@ -299,29 +299,4 @@ with tab5:
     modelo = ARIMA(df_diff, order=(2, 1, 2))  # (p, d, q)
     resultado_AR = modelo.fit()
 
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    ax.plot(df_diff, label='Valores Diferenciados')
-    ax.plot(resultado_AR.fittedvalues, color='red', label='Valores Ajustados pelo Modelo')
-    ax.set_title('RSS: %.4f' % sum((resultado_AR.fittedvalues - df_diff['preco_petroleo'])**2))
-    ax.legend()
-    st.pyplot(fig)
-
-    # Verifica pontos nulos
-    st.write("Pontos nulos no dataframe:")
-    st.write(df_diff.isnull().sum())
-
-    # Preenche pontos nulos
-    df_diff = df_diff.fillna(method='ffill')
-    if df_diff.iloc[0].isnull().any():
-        df_diff.iloc[0] = df_diff.iloc[0].fillna(df_diff.iloc[1])
-
-    st.write("Pontos nulos após preenchimento:")
-    st.write(df_diff.isnull().sum())
-
-    predictions = resultado_AR.fittedvalues
-    predictions.index = df_diff.index
-
-    predicted_values = df_ajustado_log['preco_petroleo'].iloc[0] + np.cumsum(predictions)
-    mape = mean_absolute_error(df_diff['preco_petroleo'], predicted_values) * 100
-
-    st.write(f"MAPE: {mape:.2f}%")
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height
