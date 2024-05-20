@@ -333,5 +333,5 @@ with tab6:
     st.write("""
     Para acessar o notebook original onde este código foi desenvolvido, clique no link abaixo:
     """)
-    st.markdown("[Notebook no Google Colab](https://colab.research.google.com/drive/1A0ndMgKNOn14sULlEfP8dslQ2gP6ncnF?usp=sharing)")
+    st.markdown("[Google Colab](https://colab.research.google.com/drive/1A0ndMgKNOn14sULlEfP8dslQ2gP6ncnF?usp=sharing)")
 
