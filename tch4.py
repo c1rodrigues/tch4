@@ -115,11 +115,7 @@ with tab2:
 
     - **Quarto Gráfico (Série Transformada):** Por fim, subtraímos a média móvel logarítmica da série logarítmica original para obter uma série estacionária. Também são exibidas a média móvel e o desvio padrão da série transformada para ilustrar a redução de variabilidade.
     """)
-
-    df_ajustado = df[(df['data'] > '2022-01-01') & (df['data'] <= '2024-05-01')]
-    df_ajustado = df_ajustado.set_index('data', drop=True)
-
-    X = df_ajustado['preco_petroleo'].values
+    X = df_ajustado.preco_petroleo.values
     result = adfuller(X)
 
     st.write("Teste ADF")
@@ -132,7 +128,7 @@ with tab2:
     ma = df_ajustado.rolling(12).mean()
 
     f, ax = plt.subplots()
-    df_ajustado.plot(ax=ax, legend=False, title="Média Móvel")
+    df_ajustado.plot(ax=ax, legend=False)
     ma.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
     st.pyplot(f)
@@ -141,7 +137,7 @@ with tab2:
     ma_log = df_ajustado_log.rolling(12).mean()
 
     f, ax = plt.subplots()
-    df_ajustado_log.plot(ax=ax, legend=False, title="Logaritmo da Série")
+    df_ajustado_log.plot(ax=ax, legend=False)
     ma_log.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
     st.pyplot(f)
@@ -151,16 +147,16 @@ with tab2:
     std = df_s.rolling(12).std()
 
     f, ax = plt.subplots()
-    df_s.plot(ax=ax, legend=False, title="Série Transformada")
+    df_s.plot(ax=ax, legend=False)
     ma_s.plot(ax=ax, legend=False, color='r')
     std.plot(ax=ax, legend=False, color='g')
     plt.tight_layout()
     st.pyplot(f)
 
-    X_s = df_s['preco_petroleo'].values
+    X_s = df_s.preco_petroleo.values
     result_s = adfuller(X_s)
 
-    st.write("Teste ADF (Série Transformada)")
+    st.write("Teste ADF")
     st.write(f"Teste Estatístico: {result_s[0]}")
     st.write(f"P-Value: {result_s[1]}")
     st.write("Valores críticos:")
