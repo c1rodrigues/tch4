@@ -101,11 +101,25 @@ with tab1:
     st.pyplot(fig)
 
 with tab2:
-    st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
+ st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
     st.write("""
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
+
+    A seguir, detalhamos as etapas do processo:
+
+    - **Primeiro Gráfico (Média Móvel):** Este gráfico mostra a série temporal original do preço do petróleo Brent juntamente com a média móvel de 12 períodos. A média móvel ajuda a suavizar a série, permitindo uma melhor visualização das tendências subjacentes.
+
+    - **Segundo Gráfico (Logaritmo da Série):** Aplicamos a transformação logarítmica à série temporal para estabilizar a variância. Isso é útil quando a série apresenta variações de amplitude que aumentam com o nível da série.
+
+    - **Terceiro Gráfico (Média Móvel do Logaritmo):** Após a transformação logarítmica, calculamos a média móvel de 12 períodos da série logarítmica para continuar suavizando os dados.
+
+    - **Quarto Gráfico (Série Transformada):** Por fim, subtraímos a média móvel logarítmica da série logarítmica original para obter uma série estacionária. Também são exibidas a média móvel e o desvio padrão da série transformada para ilustrar a redução de variabilidade.
     """)
-    X = df_ajustado.preco_petroleo.values
+
+    df_ajustado = df[(df['data'] > '2022-01-01') & (df['data'] <= '2024-05-01')]
+    df_ajustado = df_ajustado.set_index('data', drop=True)
+
+    X = df_ajustado['preco_petroleo'].values
     result = adfuller(X)
 
     st.write("Teste ADF")
@@ -118,7 +132,7 @@ with tab2:
     ma = df_ajustado.rolling(12).mean()
 
     f, ax = plt.subplots()
-    df_ajustado.plot(ax=ax, legend=False)
+    df_ajustado.plot(ax=ax, legend=False, title="Média Móvel")
     ma.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
     st.pyplot(f)
@@ -127,7 +141,7 @@ with tab2:
     ma_log = df_ajustado_log.rolling(12).mean()
 
     f, ax = plt.subplots()
-    df_ajustado_log.plot(ax=ax, legend=False)
+    df_ajustado_log.plot(ax=ax, legend=False, title="Logaritmo da Série")
     ma_log.plot(ax=ax, legend=False, color='r')
     plt.tight_layout()
     st.pyplot(f)
@@ -137,22 +151,22 @@ with tab2:
     std = df_s.rolling(12).std()
 
     f, ax = plt.subplots()
-    df_s.plot(ax=ax, legend=False)
+    df_s.plot(ax=ax, legend=False, title="Série Transformada")
     ma_s.plot(ax=ax, legend=False, color='r')
     std.plot(ax=ax, legend=False, color='g')
     plt.tight_layout()
     st.pyplot(f)
 
-    X_s = df_s.preco_petroleo.values
+    X_s = df_s['preco_petroleo'].values
     result_s = adfuller(X_s)
 
-    st.write("Teste ADF")
+    st.write("Teste ADF (Série Transformada)")
     st.write(f"Teste Estatístico: {result_s[0]}")
     st.write(f"P-Value: {result_s[1]}")
     st.write("Valores críticos:")
     for key, value in result_s[4].items():
         st.write(f"\t{key}: {value}")
-
+        
 with tab3:
     st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
     st.write("""
