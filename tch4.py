@@ -16,7 +16,7 @@ import plotly.express as px
 import streamlit as st
 
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller, acf, pacf
 from statsmodels.tsa.arima.model import ARIMA
 
 from sklearn.preprocessing import MinMaxScaler
@@ -189,18 +189,20 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf = px.line(x=range(len(acf(df_diff.dropna(), nlags=25))), y=acf(df_diff.dropna(), nlags=25), title='ACF (Autocorrelação)', width=fig_width*100, height=fig_height*100)
-    lag_acf.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    lag_acf.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    st.plotly_chart(lag_acf)
+    lag_acf_values = acf(df_diff.dropna(), nlags=25)
+    fig = px.line(x=range(len(lag_acf_values)), y=lag_acf_values, title='ACF (Autocorrelação)', width=fig_width*100, height=fig_height*100)
+    fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf = px.line(x=range(len(pacf(df_diff.dropna(), nlags=25))), y=pacf(df_diff.dropna(), nlags=25), title='PACF (Autocorrelação Parcial)', width=fig_width*100, height=fig_height*100)
-    lag_pacf.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    lag_pacf.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
-    st.plotly_chart(lag_pacf)
+    lag_pacf_values = pacf(df_diff.dropna(), nlags=25)
+    fig = px.line(x=range(len(lag_pacf_values)), y=lag_pacf_values, title='PACF (Autocorrelação Parcial)', width=fig_width*100, height=fig_height*100)
+    fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    st.plotly_chart(fig)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
