@@ -103,21 +103,12 @@ with tab1:
 with tab2:
     st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
     st.write("""
-    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
-
-    A seguir, detalhamos as etapas do processo:
-
-    - **Primeiro Gráfico (Média Móvel):** Este gráfico mostra a série temporal original do preço do petróleo Brent juntamente com a média móvel de 12 períodos. A média móvel ajuda a suavizar a série, permitindo uma melhor visualização das tendências subjacentes.
-
-    - **Segundo Gráfico (Logaritmo da Série):** Aplicamos a transformação logarítmica à série temporal para estabilizar a variância. Isso é útil quando a série apresenta variações de amplitude que aumentam com o nível da série.
-
-    - **Terceiro Gráfico (Média Móvel do Logaritmo):** Após a transformação logarítmica, calculamos a média móvel de 12 períodos da série logarítmica para continuar suavizando os dados.
-
-    - **Quarto Gráfico (Série Transformada):** Por fim, subtraímos a média móvel logarítmica da série logarítmica original para obter uma série estacionária. Também são exibidas a média móvel e o desvio padrão da série transformada para ilustrar a redução de variabilidade.
+    Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais.
     """)
-    X = df_ajustado.preco_petroleo.values
+    
+    X  = df_ajustado.preco_petroleo.values
     result = adfuller(X)
-
+    
     st.write("Teste ADF")
     st.write(f"Teste Estatístico: {result[0]}")
     st.write(f"P-Value: {result[1]}")
@@ -125,37 +116,46 @@ with tab2:
     for key, value in result[4].items():
         st.write(f"\t{key}: {value}")
 
+    st.write("""
+    O gráfico a seguir mostra a série temporal original e a média móvel de 12 períodos. A média móvel ajuda a suavizar as flutuações de curto prazo e a destacar a tendência de longo prazo.
+    """)
     ma = df_ajustado.rolling(12).mean()
-
     f, ax = plt.subplots()
-    df_ajustado.plot(ax=ax, legend=False)
-    ma.plot(ax=ax, legend=False, color='r')
+    df_ajustado.plot (ax=ax, legend = False)
+    ma.plot (ax=ax, legend = False, color = 'r')
     plt.tight_layout()
     st.pyplot(f)
 
+    st.write("""
+    Aplicamos uma transformação logarítmica para estabilizar a variância. A série log-transformada é então suavizada com uma média móvel de 12 períodos.
+    """)
     df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
-
     f, ax = plt.subplots()
-    df_ajustado_log.plot(ax=ax, legend=False)
-    ma_log.plot(ax=ax, legend=False, color='r')
+    df_ajustado_log.plot (ax=ax, legend = False)
+    ma_log.plot (ax=ax, legend = False, color = 'r')
     plt.tight_layout()
     st.pyplot(f)
 
-    df_s = (df_ajustado_log - ma_log).dropna()
+    st.write("""
+    A série temporal log-transformada e suavizada é subtraída da série log-transformada original, resultando em uma série estacionária.
+    """)
+    df_s = (df_ajustado_log - ma_log ).dropna()
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
-
     f, ax = plt.subplots()
-    df_s.plot(ax=ax, legend=False)
-    ma_s.plot(ax=ax, legend=False, color='r')
-    std.plot(ax=ax, legend=False, color='g')
+    df_s.plot (ax=ax, legend = False)
+    ma_s.plot (ax=ax, legend = False, color = 'r')
+    std.plot (ax=ax, legend = False, color = 'g')
     plt.tight_layout()
     st.pyplot(f)
 
-    X_s = df_s.preco_petroleo.values
+    st.write("""
+    Realizamos novamente o teste de Dickey-Fuller Aumentado na série transformada e suavizada para confirmar a estacionaridade.
+    """)
+    X_s  = df_s.preco_petroleo.values
     result_s = adfuller(X_s)
-
+    
     st.write("Teste ADF")
     st.write(f"Teste Estatístico: {result_s[0]}")
     st.write(f"P-Value: {result_s[1]}")
