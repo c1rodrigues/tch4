@@ -73,25 +73,29 @@ with tab1:
     st.write("""
     **Primeiro Gráfico (Observado):** Este gráfico mostra os preços observados do petróleo Brent de janeiro de 2022 a maio de 2024. Aqui, podemos ver claramente as flutuações no preço do petróleo durante esse período, refletindo eventos e influências econômicas e geopolíticas.
     """)
-    fig = px.line(resultados.observed.reset_index(), x='data', y='preco_petroleo', title="Preços Observados do Petróleo Brent", template='plotly_white')
+    df_observed = resultados.observed.to_frame().reset_index().rename(columns={0: 'preco_petroleo'})
+    fig = px.line(df_observed, x='data', y='preco_petroleo', title="Preços Observados do Petróleo Brent", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     **Segundo Gráfico (Tendência):** Este gráfico mostra a tendência subjacente dos preços do petróleo. Ele suaviza as flutuações diárias para revelar a direção geral do mercado ao longo do tempo. Podemos observar períodos de aumento e queda prolongados, que podem ser atribuídos a mudanças estruturais no mercado, como políticas de produção de petróleo ou mudanças na demanda global.
     """)
-    fig = px.line(resultados.trend.reset_index(), x='data', y='preco_petroleo', title="Tendência dos Preços do Petróleo Brent", template='plotly_white')
+    df_trend = resultados.trend.to_frame().reset_index().rename(columns={0: 'preco_petroleo'})
+    fig = px.line(df_trend, x='data', y='preco_petroleo', title="Tendência dos Preços do Petróleo Brent", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     **Terceiro Gráfico (Sazonalidade):** Este gráfico mostra os padrões sazonais no preço do petróleo. A sazonalidade captura as flutuações que ocorrem em intervalos regulares devido a fatores recorrentes, como variações sazonais na demanda ou oferta. Podemos ver que o preço do petróleo tende a seguir um padrão repetitivo ao longo do tempo.
     """)
-    fig = px.line(resultados.seasonal.reset_index(), x='data', y='preco_petroleo', title="Sazonalidade dos Preços do Petróleo Brent", template='plotly_white')
+    df_seasonal = resultados.seasonal.to_frame().reset_index().rename(columns={0: 'preco_petroleo'})
+    fig = px.line(df_seasonal, x='data', y='preco_petroleo', title="Sazonalidade dos Preços do Petróleo Brent", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     **Quarto Gráfico (Resíduos):** Este gráfico mostra os resíduos, ou seja, as variações que não são explicadas pela tendência ou sazonalidade. Os resíduos representam a componente aleatória dos dados, incluindo os choques imprevisíveis no mercado de petróleo, como desastres naturais ou eventos geopolíticos inesperados.
     """)
-    fig = px.line(resultados.resid.reset_index(), x='data', y='preco_petroleo', title="Resíduos dos Preços do Petróleo Brent", template='plotly_white')
+    df_resid = resultados.resid.to_frame().reset_index().rename(columns={0: 'preco_petroleo'})
+    fig = px.line(df_resid, x='data', y='preco_petroleo', title="Resíduos dos Preços do Petróleo Brent", template='plotly_white')
     st.plotly_chart(fig)
 
 with tab2:
@@ -184,28 +188,32 @@ with tab3:
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
     acf_vals = acf(df_diff['preco_petroleo'], nlags=25)
-    fig = px.bar(x=np.arange(len(acf_vals)), y=acf_vals, title="ACF (Autocorrelação)", template='plotly_white')
+    df_acf = pd.DataFrame({'lag': np.arange(len(acf_vals)), 'acf': acf_vals})
+    fig = px.bar(df_acf, x='lag', y='acf', title="ACF (Autocorrelação)", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
     pacf_vals = pacf(df_diff['preco_petroleo'], nlags=25)
-    fig = px.bar(x=np.arange(len(pacf_vals)), y=pacf_vals, title="PACF (Autocorrelação Parcial)", template='plotly_white')
+    df_pacf = pd.DataFrame({'lag': np.arange(len(pacf_vals)), 'pacf': pacf_vals})
+    fig = px.bar(df_pacf, x='lag', y='pacf', title="PACF (Autocorrelação Parcial)", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
     """)
     acf_vals_orig = acf(df_ajustado['preco_petroleo'], nlags=25)
-    fig = px.bar(x=np.arange(len(acf_vals_orig)), y=acf_vals_orig, title="ACF (Autocorrelação) - Série Original", template='plotly_white')
+    df_acf_orig = pd.DataFrame({'lag': np.arange(len(acf_vals_orig)), 'acf': acf_vals_orig})
+    fig = px.bar(df_acf_orig, x='lag', y='acf', title="ACF (Autocorrelação) - Série Original", template='plotly_white')
     st.plotly_chart(fig)
 
     st.write("""
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
     pacf_vals_orig = pacf(df_ajustado['preco_petroleo'], nlags=25)
-    fig = px.bar(x=np.arange(len(pacf_vals_orig)), y=pacf_vals_orig, title="PACF (Autocorrelação Parcial) - Série Original", template='plotly_white')
+    df_pacf_orig = pd.DataFrame({'lag': np.arange(len(pacf_vals_orig)), 'pacf': pacf_vals_orig})
+    fig = px.bar(df_pacf_orig, x='lag', y='pacf', title="PACF (Autocorrelação Parcial) - Série Original", template='plotly_white')
     st.plotly_chart(fig)
 
 with tab4:
@@ -235,6 +243,7 @@ with tab4:
     previsao = modelo.predict(dataFramefuture)
 
     fig = px.line(previsao, x='ds', y='yhat', title='Previsão de Preços com Prophet', template='plotly_white')
+    fig.add_scatter(x=test_and_val_data['ds'], y=test_and_val_data['y'], mode='markers', name='Valores Reais')
     st.plotly_chart(fig)
 
     previsao_cols = ['ds', 'yhat']
