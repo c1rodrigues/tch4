@@ -162,6 +162,7 @@ with tab3:
     """)
 
     df_diff = df_s.diff(1)
+    df_diff = df_diff.dropna()
     ma_diff = df_diff.rolling(12).mean()
     std_diff = df_diff.rolling(12).std()
 
@@ -176,7 +177,7 @@ with tab3:
     st.write("""
     Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
     """)
-    X_diff = df_diff.preco_petroleo.dropna().values
+    X_diff = df_diff.preco_petroleo.values
     result_diff = adfuller(X_diff)
 
     st.write("Teste ADF")
@@ -189,7 +190,7 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf_values = acf(df_diff.dropna(), nlags=25)
+    lag_acf_values = acf(df_diff, nlags=25)
     fig = px.line(x=range(len(lag_acf_values)), y=lag_acf_values, title='ACF (Autocorrelação)', width=fig_width*100, height=fig_height*100)
     fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
     fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
@@ -198,7 +199,7 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf_values = pacf(df_diff.dropna(), nlags=25)
+    lag_pacf_values = pacf(df_diff, nlags=25)
     fig = px.line(x=range(len(lag_pacf_values)), y=lag_pacf_values, title='PACF (Autocorrelação Parcial)', width=fig_width*100, height=fig_height*100)
     fig.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
     fig.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
@@ -259,9 +260,15 @@ with tab5:
     predictions.index = df_diff.index
 
     predicted_values = df_ajustado_log['preco_petroleo'].iloc[0] + np.cumsum(predictions)
-    mape = mean_absolute_error(df_diff['preco_petroleo'], predicted_values) * 100
+    
+    # Remove valores NaN ou infinitos
+    valid_idx = ~np.isnan(predicted_values) & ~np.isinf(predicted_values)
+    df_diff_valid = df_diff[valid_idx]
+    predicted_values_valid = predicted_values[valid_idx]
+    
+    mape = mean_absolute_error(df_diff_valid['preco_petroleo'], predicted_values_valid) * 100
 
-    fig = px.line(df_diff, x=df_diff.index, y='preco_petroleo', title='Valores Diferenciados e Ajustados pelo Modelo ARIMA', width=fig_width*100, height=fig_height*100)
+    fig = px.line(df_diff_valid, x=df_diff_valid.index, y='preco_petroleo', title='Valores Diferenciados e Ajustados pelo Modelo ARIMA', width=fig_width*100, height=fig_height*100)
     fig.add_scatter(x=predictions.index, y=predictions, mode='lines', name='Valores Ajustados pelo Modelo', line=dict(color='red'))
     st.plotly_chart(fig)
 
