@@ -101,7 +101,7 @@ with tab1:
     st.pyplot(fig)
 
 with tab2:
- st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
+    st.subheader("Teste de Estacionaridade e Transformações de Série Temporal")
     st.write("""
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais. Nesta página, utilizamos o Teste ADF (Dickey-Fuller Aumentado) para verificar a estacionaridade e aplicamos transformações, como logaritmos e diferenciação, para estabilizar a variância e tornar a série mais adequada para análise preditiva.
 
@@ -166,7 +166,7 @@ with tab2:
     st.write("Valores críticos:")
     for key, value in result_s[4].items():
         st.write(f"\t{key}: {value}")
-        
+
 with tab3:
     st.subheader("Análise de Autocorrelação e Autocorrelação Parcial")
     st.write("""
