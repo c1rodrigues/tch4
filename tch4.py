@@ -13,6 +13,7 @@ from sqlalchemy.engine.url import URL
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import matplotlib.pyplot as plt
 import streamlit as st
 
 from statsmodels.tsa.seasonal import seasonal_decompose
