@@ -198,7 +198,7 @@ with tab3:
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     df_diff.plot(ax=ax, legend=False)
     ma_diff.plot(ax=ax, legend=False, color='r')
     std_diff.plot(ax=ax, legend=False, color='g')
@@ -221,28 +221,38 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    fig, ax = plt.subplots()
-    plot_acf(df_diff.dropna(), ax=ax)
+    lag_acf = acf(df_diff.dropna(), nlags=25)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    ax.plot(lag_acf)
+    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.set_title("ACF (Autocorrelação)")
     st.pyplot(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    fig, ax = plt.subplots()
-    plot_pacf(df_diff.dropna(), ax=ax)
+    lag_pacf = pacf(df_diff.dropna(), nlags=25)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    ax.plot(lag_pacf)
+    ax.axhline(y=-1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=0, linestyle='--', color='gray', linewidth=.7)
+    ax.axhline(y=1.96/(np.sqrt((len(df_diff) -1))), linestyle='--', color='gray', linewidth=.7)
+    ax.set_title("PACF (Autocorrelação Parcial)")
     st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
     """)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     plot_acf(df_ajustado.preco_petroleo, ax=ax)
     st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     plot_pacf(df_ajustado.preco_petroleo, ax=ax)
     st.pyplot(fig)
 
@@ -272,7 +282,7 @@ with tab4:
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     modelo.plot(previsao, ax=ax)
     ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
     st.pyplot(fig)
