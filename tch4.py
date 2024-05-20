@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1A0ndMgKNOn14sULlEfP8dslQ2gP6ncnF
 """
 
-# Commented out IPython magic to ensure Python compatibility.
+# Importações necessárias
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 import pandas as pd
@@ -19,17 +19,13 @@ import seaborn as sns
 # %matplotlib inline
 
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.tsa.stattools import adfuller, acf, pacf
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.arima.model import ARIMA
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error
-
 import warnings
 warnings.filterwarnings('ignore')
 import streamlit as st
@@ -88,6 +84,7 @@ with tab1:
     
     Através dessa análise de decomposição, podemos entender melhor como diferentes componentes contribuem para a variação do preço do petróleo Brent. Essa visão é crucial para investidores, economistas e formuladores de políticas, permitindo-lhes tomar decisões informadas baseadas em uma compreensão profunda dos padrões históricos e das dinâmicas de mercado.
     """)
+
     df_ajustado = df_petroleo[(df_petroleo['data'] > '2022-01-01') & (df_petroleo['data'] <= '2024-05-01')]
     df_ajustado = df_ajustado.set_index('data', drop=True)
     resultados = seasonal_decompose(df_ajustado, period=5, model='multiplicative')
@@ -105,10 +102,10 @@ with tab2:
     st.write("""
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais.
     """)
-    
+
     X  = df_ajustado.preco_petroleo.values
     result = adfuller(X)
-    
+
     st.write("Teste ADF")
     st.write(f"Teste Estatístico: {result[0]}")
     st.write(f"P-Value: {result[1]}")
@@ -155,7 +152,7 @@ with tab2:
     """)
     X_s  = df_s.preco_petroleo.values
     result_s = adfuller(X_s)
-    
+
     st.write("Teste ADF")
     st.write(f"Teste Estatístico: {result_s[0]}")
     st.write(f"P-Value: {result_s[1]}")
@@ -231,11 +228,13 @@ with tab3:
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
     st.pyplot(plot_pacf(df_ajustado.preco_petroleo))
+
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
     st.write("""
     A previsão de preços do petróleo é uma tarefa complexa, mas crucial para decisões econômicas e estratégicas. Utilizando o modelo Prophet, desenvolvemos previsões baseadas em dados históricos ajustados. Nesta página, mostramos como o Prophet pode capturar a sazonalidade diária e realizar previsões para períodos futuros. Além disso, comparamos as previsões com os valores reais para calcular a precisão do modelo, usando a métrica MAPE (Erro Percentual Absoluto Médio).
     """)
+
     df = df_petroleo[(df_petroleo['data'] > '2022-01-01') & (df_petroleo['data'] <= '2024-05-01')]
     df.sort_values('data', ascending=True, inplace=True)
     df = df.reset_index(drop=True)
@@ -255,7 +254,7 @@ with tab4:
     modelo.fit(train_data)
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
-    
+
     f, ax = plt.subplots(figsize=(20, 6))
     modelo.plot(previsao, ax=ax)
     ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
@@ -278,6 +277,7 @@ with tab5:
     st.write("""
     A modelagem ARIMA é uma abordagem poderosa para análise e previsão de séries temporais. Utilizamos o modelo ARIMA para ajustar os dados transformados do preço do petróleo e avaliar a sua performance. Esta página mostra o ajuste do modelo e a comparação com os valores reais, ajudando a entender a eficácia do ARIMA na previsão do preço do petróleo.
     """)
+
     modelo = ARIMA(df_diff, order=(2, 1, 2))  # (p, d, q)
     resultado_AR = modelo.fit()
 
@@ -304,6 +304,4 @@ with tab5:
     predictions.index = df_diff.index
 
     predicted_values = df_ajustado_log['preco_petroleo'].iloc[0] + np.cumsum(predictions)
-    mape = mean_absolute_error(df_diff['preco_petroleo'], predicted_values) * 100
-
-    st.write(f"MAPE: {mape:.2f}%")
+   
