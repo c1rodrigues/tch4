@@ -47,7 +47,7 @@ df_petroleo.isnull().sum()
 df_petroleo.info()
 
 # Criando abas na aplicação
-tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(['Evolução do Preço do Petróleo Brent', 'Análise de Tendências e Sazonalidade', 'Teste de Estacionaridade e Transformações de Série Temporal', 'Análise de Autocorrelação e Autocorrelação Parcial', 'Previsão de Preços com Prophet', 'Modelagem ARIMA'])
+tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(['Evolução do Preço do Petróleo Brent', 'Análise de Tendências e Sazonalidade', 'Teste de Estacionaridade e Transformações de Série Temporal', 'Análise de Autocorrelação e Autocorrelação Parcial', 'Previsão de Preços com Prophet', 'Modelagem ARIMA','Notebook'])
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
@@ -325,3 +325,11 @@ with tab5:
     mape = mean_absolute_error(df_diff['preco_petroleo'], predicted_values) * 100
 
     st.write(f"MAPE: {mape:.2f}%")
+
+with tab6:
+    st.subheader("Notebook")
+    st.write("""
+    Para acessar o notebook original onde este código foi desenvolvido, clique no link abaixo:
+    """)
+    st.markdown("[Notebook no Google Colab](https://colab.research.google.com/drive/1A0ndMgKNOn14sULlEfP8dslQ2gP6ncnF?usp=sharing)")
+
