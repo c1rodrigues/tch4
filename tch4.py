@@ -218,30 +218,34 @@ with tab3:
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
     lag_acf = acf(df_diff.dropna(), nlags=25)
-    fig = px.bar(x=np.arange(len(lag_acf)), y=lag_acf, template=plotly_template)
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", width=plotly_width, height=plotly_height)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=np.arange(len(lag_acf)), y=lag_acf))
+    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
     lag_pacf = pacf(df_diff.dropna(), nlags=25)
-    fig = px.bar(x=np.arange(len(lag_pacf)), y=lag_pacf, template=plotly_template)
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", width=plotly_width, height=plotly_height)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=np.arange(len(lag_pacf)), y=lag_pacf))
+    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
     """)
-    fig = px.bar(x=np.arange(len(acf(df_ajustado.preco_petroleo, nlags=25))), y=acf(df_ajustado.preco_petroleo, nlags=25), template=plotly_template)
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", width=plotly_width, height=plotly_height)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=np.arange(len(acf(df_ajustado.preco_petroleo, nlags=25))), y=acf(df_ajustado.preco_petroleo, nlags=25)))
+    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     st.write("""
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
-    fig = px.bar(x=np.arange(len(pacf(df_ajustado.preco_petroleo, nlags=25))), y=pacf(df_ajustado.preco_petroleo, nlags=25), template=plotly_template)
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", width=plotly_width, height=plotly_height)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=np.arange(len(pacf(df_ajustado.preco_petroleo, nlags=25))), y=pacf(df_ajustado.preco_petroleo, nlags=25)))
+    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
 with tab4:
