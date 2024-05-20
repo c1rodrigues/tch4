@@ -52,7 +52,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
 plt.style.use('ggplot')
-fig_width, fig_height = (10, 5)
+fig_width, fig_height = (7, 5)
 
 with tab0:
     st.subheader("Evolução do Preço do Petróleo Brent")
