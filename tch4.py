@@ -12,23 +12,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import plotly.express as px
-import seaborn as sns
-# %matplotlib inline
+import streamlit as st
 
 from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.tsa.stattools import adfuller, acf, pacf
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.arima.model import ARIMA
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from sklearn.model_selection import train_test_split
 import warnings
 warnings.filterwarnings('ignore')
-import streamlit as st
 
 from prophet import Prophet
 
@@ -51,17 +45,15 @@ tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs(['Evolução do Preço do Petróleo
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # Estilo dos gráficos
-plotly_template = 'plotly_white'
-plotly_width = 1000
-plotly_height = 500
+fig_width, fig_height = (10, 5)
 
 with tab0:
     st.subheader("Evolução do Preço do Petróleo Brent")
     st.write("""
     Nesta página, apresentamos a evolução histórica do preço do Petróleo Brent, um dos principais benchmarks mundiais. Desde a Guerra do Golfo em 1990, passando pela crise financeira de 2008 e os impactos das tensões geopolíticas e da pandemia de COVID-19, o gráfico a seguir mostra como eventos globais influenciaram significativamente o mercado de petróleo. Analisando essas flutuações, podemos entender melhor a volatilidade deste mercado e os fatores que impulsionam as mudanças nos preços.
     """)
-    fig = px.line(df_petroleo, x='data', y='preco_petroleo', template=plotly_template)
-    fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(df_petroleo, x='data', y='preco_petroleo', template='plotly_white', width=fig_width*100, height=fig_height*100)
+    fig.update_layout(title="Evolução do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril")
     st.plotly_chart(fig)
 
     st.write("""
@@ -85,37 +77,25 @@ with tab1:
     st.write("""
     **Primeiro Gráfico (Observado):** Este gráfico mostra os preços observados do petróleo Brent de janeiro de 2022 a maio de 2024. Aqui, podemos ver claramente as flutuações no preço do petróleo durante esse período, refletindo eventos e influências econômicas e geopolíticas.
     """)
-    observed_df = resultados.observed.reset_index()
-    observed_df.columns = ['data', 'preco_petroleo']
-    fig = px.line(observed_df, x='data', y='preco_petroleo', template=plotly_template)
-    fig.update_layout(title="Preços Observados do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(df_ajustado, x=df_ajustado.index, y='preco_petroleo', title='Preços Observados do Petróleo Brent', width=fig_width*100, height=fig_height*100)
     st.plotly_chart(fig)
 
     st.write("""
     **Segundo Gráfico (Tendência):** Este gráfico mostra a tendência subjacente dos preços do petróleo. Ele suaviza as flutuações diárias para revelar a direção geral do mercado ao longo do tempo. Podemos observar períodos de aumento e queda prolongados, que podem ser atribuídos a mudanças estruturais no mercado, como políticas de produção de petróleo ou mudanças na demanda global.
     """)
-    trend_df = resultados.trend.reset_index()
-    trend_df.columns = ['data', 'preco_petroleo']
-    fig = px.line(trend_df, x='data', y='preco_petroleo', template=plotly_template)
-    fig.update_layout(title="Tendência dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(resultados.trend.dropna(), title='Tendência dos Preços do Petróleo Brent', width=fig_width*100, height=fig_height*100)
     st.plotly_chart(fig)
 
     st.write("""
     **Terceiro Gráfico (Sazonalidade):** Este gráfico mostra os padrões sazonais no preço do petróleo. A sazonalidade captura as flutuações que ocorrem em intervalos regulares devido a fatores recorrentes, como variações sazonais na demanda ou oferta. Podemos ver que o preço do petróleo tende a seguir um padrão repetitivo ao longo do tempo.
     """)
-    seasonal_df = resultados.seasonal.reset_index()
-    seasonal_df.columns = ['data', 'preco_petroleo']
-    fig = px.line(seasonal_df, x='data', y='preco_petroleo', template=plotly_template)
-    fig.update_layout(title="Sazonalidade dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(resultados.seasonal.dropna(), title='Sazonalidade dos Preços do Petróleo Brent', width=fig_width*100, height=fig_height*100)
     st.plotly_chart(fig)
 
     st.write("""
     **Quarto Gráfico (Resíduos):** Este gráfico mostra os resíduos, ou seja, as variações que não são explicadas pela tendência ou sazonalidade. Os resíduos representam a componente aleatória dos dados, incluindo os choques imprevisíveis no mercado de petróleo, como desastres naturais ou eventos geopolíticos inesperados.
     """)
-    resid_df = resultados.resid.reset_index()
-    resid_df.columns = ['data', 'preco_petroleo']
-    fig = px.line(resid_df, x='data', y='preco_petroleo', template=plotly_template)
-    fig.update_layout(title="Resíduos dos Preços do Petróleo Brent", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(resultados.resid.dropna(), title='Resíduos dos Preços do Petróleo Brent', width=fig_width*100, height=fig_height*100)
     st.plotly_chart(fig)
 
 with tab2:
@@ -124,7 +104,7 @@ with tab2:
     Para modelar adequadamente a série temporal do preço do petróleo, é crucial determinar se a série é estacionária. A estacionaridade é uma propriedade essencial para muitas técnicas de modelagem de séries temporais.
     """)
 
-    X = df_ajustado['preco_petroleo'].values
+    X = df_ajustado.preco_petroleo.values
     result = adfuller(X)
 
     st.write("Teste ADF")
@@ -137,40 +117,35 @@ with tab2:
     st.write("""
     O gráfico a seguir mostra a série temporal original e a média móvel de 12 períodos. A média móvel ajuda a suavizar as flutuações de curto prazo e a destacar a tendência de longo prazo.
     """)
-    ma = df_ajustado.rolling(12).mean().reset_index()
-    df_ajustado = df_ajustado.reset_index()
-    fig = px.line(df_ajustado, x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma['data'], y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.update_layout(title="Série Temporal Original e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    ma = df_ajustado.rolling(12).mean()
+    fig = px.line(df_ajustado, x=df_ajustado.index, y='preco_petroleo', title='Série Temporal Original e Média Móvel', width=fig_width*100, height=fig_height*100)
+    fig.add_scatter(x=df_ajustado.index, y=ma['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     st.plotly_chart(fig)
 
     st.write("""
     Aplicamos uma transformação logarítmica para estabilizar a variância. A série log-transformada é então suavizada com uma média móvel de 12 períodos.
     """)
-    df_ajustado_log = np.log(df_ajustado.set_index('data')['preco_petroleo'])
-    ma_log = df_ajustado_log.rolling(12).mean().reset_index()
-    df_ajustado_log = df_ajustado_log.reset_index()
-    fig = px.line(df_ajustado_log, x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_log['data'], y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.update_layout(title="Série Log-Transformada e Média Móvel", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    df_ajustado_log = np.log(df_ajustado)
+    ma_log = df_ajustado_log.rolling(12).mean()
+    fig = px.line(df_ajustado_log, x=df_ajustado_log.index, y='preco_petroleo', title='Série Log-Transformada e Média Móvel', width=fig_width*100, height=fig_height*100)
+    fig.add_scatter(x=df_ajustado_log.index, y=ma_log['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
     st.plotly_chart(fig)
 
     st.write("""
     A série temporal log-transformada e suavizada é subtraída da série log-transformada original, resultando em uma série estacionária.
     """)
-    df_s = (df_ajustado_log.set_index('data') - ma_log.set_index('data')).dropna().reset_index()
-    ma_s = df_s.rolling(12).mean().reset_index()
-    std = df_s.rolling(12).std().reset_index()
-    fig = px.line(df_s, x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_s['data'], y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.add_scatter(x=std['data'], y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
-    fig.update_layout(title="Série Estacionária com Média Móvel e Desvio Padrão", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    df_s = (df_ajustado_log - ma_log).dropna()
+    ma_s = df_s.rolling(12).mean()
+    std = df_s.rolling(12).std()
+    fig = px.line(df_s, x=df_s.index, y='preco_petroleo', title='Série Estacionária com Média Móvel e Desvio Padrão', width=fig_width*100, height=fig_height*100)
+    fig.add_scatter(x=df_s.index, y=ma_s['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
+    fig.add_scatter(x=df_s.index, y=std['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
     st.plotly_chart(fig)
 
     st.write("""
     Realizamos novamente o teste de Dickey-Fuller Aumentado na série transformada e suavizada para confirmar a estacionaridade.
     """)
-    X_s = df_s['preco_petroleo'].values
+    X_s = df_s.preco_petroleo.values
     result_s = adfuller(X_s)
 
     st.write("Teste ADF")
@@ -186,23 +161,22 @@ with tab3:
     A análise de autocorrelação (ACF) e autocorrelação parcial (PACF) nos ajuda a identificar dependências temporais na série de preços do petróleo. Estes gráficos são fundamentais para selecionar os parâmetros apropriados para modelos ARIMA (Autoregressive Integrated Moving Average). Ao entender a relação entre valores passados e presentes, podemos construir modelos mais precisos e robustos para previsão dos preços futuros.
     """)
 
-    df_diff = df_s.diff(1).dropna().reset_index()
-    ma_diff = df_diff.rolling(12).mean().reset_index()
-    std_diff = df_diff.rolling(12).std().reset_index()
+    df_diff = df_s.diff(1)
+    ma_diff = df_diff.rolling(12).mean()
+    std_diff = df_diff.rolling(12).std()
 
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    fig = px.line(df_diff, x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=ma_diff['data'], y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
-    fig.add_scatter(x=std_diff['data'], y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
-    fig.update_layout(title="Série Temporal Diferenciada com Média Móvel e Desvio Padrão", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
+    fig = px.line(df_diff, x=df_diff.index, y='preco_petroleo', title='Série Temporal Diferenciada com Média Móvel e Desvio Padrão', width=fig_width*100, height=fig_height*100)
+    fig.add_scatter(x=df_diff.index, y=ma_diff['preco_petroleo'], mode='lines', name='Média Móvel', line=dict(color='red'))
+    fig.add_scatter(x=df_diff.index, y=std_diff['preco_petroleo'], mode='lines', name='Desvio Padrão', line=dict(color='green'))
     st.plotly_chart(fig)
 
     st.write("""
     Em seguida, realizamos o teste de Dickey-Fuller Aumentado na série diferenciada para confirmar a estacionaridade.
     """)
-    X_diff = df_diff['preco_petroleo'].dropna().values
+    X_diff = df_diff.preco_petroleo.dropna().values
     result_diff = adfuller(X_diff)
 
     st.write("Teste ADF")
@@ -215,38 +189,18 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    lag_acf = acf(df_diff['preco_petroleo'], nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_acf)), y=lag_acf))
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    lag_acf = px.line(x=range(len(acf(df_diff.dropna(), nlags=25))), y=acf(df_diff.dropna(), nlags=25), title='ACF (Autocorrelação)', width=fig_width*100, height=fig_height*100)
+    lag_acf.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    lag_acf.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    st.plotly_chart(lag_acf)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    lag_pacf = pacf(df_diff['preco_petroleo'], nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_pacf)), y=lag_pacf))
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
-
-    st.write("""
-    Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
-    """)
-    lag_acf_original = acf(df_ajustado.set_index('data')['preco_petroleo'], nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_acf_original)), y=lag_acf_original))
-    fig.update_layout(title="ACF (Autocorrelação)", xaxis_title="Lags", yaxis_title="Autocorrelação", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
-
-    st.write("""
-    Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
-    """)
-    lag_pacf_original = pacf(df_ajustado.set_index('data')['preco_petroleo'], nlags=25)
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=np.arange(len(lag_pacf_original)), y=lag_pacf_original))
-    fig.update_layout(title="PACF (Autocorrelação Parcial)", xaxis_title="Lags", yaxis_title="Autocorrelação Parcial", template=plotly_template, width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
+    lag_pacf = px.line(x=range(len(pacf(df_diff.dropna(), nlags=25))), y=pacf(df_diff.dropna(), nlags=25), title='PACF (Autocorrelação Parcial)', width=fig_width*100, height=fig_height*100)
+    lag_pacf.add_hline(y=1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    lag_pacf.add_hline(y=-1.96/np.sqrt(len(df_diff)-1), line_dash="dash", line_color="gray")
+    st.plotly_chart(lag_pacf)
 
 with tab4:
     st.subheader("Previsão de Preços com Prophet")
@@ -274,9 +228,8 @@ with tab4:
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
 
-    fig = px.line(previsao, x='ds', y='yhat', template=plotly_template)
+    fig = px.line(previsao, x='ds', y='yhat', title='Previsão de Preços do Petróleo com Prophet', width=fig_width*100, height=fig_height*100)
     fig.add_scatter(x=test_and_val_data['ds'], y=test_and_val_data['y'], mode='markers', name='Valores Reais', marker=dict(color='red'))
-    fig.update_layout(title="Previsão de Preços com Prophet", xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
     st.plotly_chart(fig)
 
     previsao_cols = ['ds', 'yhat']
@@ -297,30 +250,17 @@ with tab5:
     A modelagem ARIMA é uma abordagem poderosa para análise e previsão de séries temporais. Utilizamos o modelo ARIMA para ajustar os dados transformados do preço do petróleo e avaliar a sua performance. Esta página mostra o ajuste do modelo e a comparação com os valores reais, ajudando a entender a eficácia do ARIMA na previsão do preço do petróleo.
     """)
 
-    modelo = ARIMA(df_diff.set_index('data')['preco_petroleo'], order=(2, 1, 2))  # (p, d, q)
+    modelo = ARIMA(df_diff, order=(2, 1, 2))  # (p, d, q)
     resultado_AR = modelo.fit()
 
-    fig = px.line(df_diff, x='data', y='preco_petroleo', template=plotly_template)
-    fig.add_scatter(x=resultado_AR.fittedvalues.index, y=resultado_AR.fittedvalues, mode='lines', name='Valores Ajustados pelo Modelo', line=dict(color='red'))
-    fig.update_layout(title='RSS: %.4f' % sum((resultado_AR.fittedvalues - df_diff.set_index('data')['preco_petroleo'])**2), xaxis_title="Data", yaxis_title="Dolares por Barril", width=plotly_width, height=plotly_height)
-    st.plotly_chart(fig)
-
-    # Verifica pontos nulos
-    st.write("Pontos nulos no dataframe:")
-    st.write(df_diff.isnull().sum())
-
-    # Preenche pontos nulos
-    df_diff = df_diff.fillna(method='ffill')
-    if df_diff.iloc[0].isnull().any():
-        df_diff.iloc[0] = df_diff.iloc[0].fillna(df_diff.iloc[1])
-
-    st.write("Pontos nulos após preenchimento:")
-    st.write(df_diff.isnull().sum())
-
     predictions = resultado_AR.fittedvalues
-    predictions.index = df_diff.set_index('data').index
+    predictions.index = df_diff.index
 
-    predicted_values = df_ajustado_log.set_index('data')['preco_petroleo'].iloc[0] + np.cumsum(predictions)
-    mape = mean_absolute_error(df_diff.set_index('data')['preco_petroleo'], predicted_values) * 100
+    predicted_values = df_ajustado_log['preco_petroleo'].iloc[0] + np.cumsum(predictions)
+    mape = mean_absolute_error(df_diff['preco_petroleo'], predicted_values) * 100
+
+    fig = px.line(df_diff, x=df_diff.index, y='preco_petroleo', title='Valores Diferenciados e Ajustados pelo Modelo ARIMA', width=fig_width*100, height=fig_height*100)
+    fig.add_scatter(x=predictions.index, y=predictions, mode='lines', name='Valores Ajustados pelo Modelo', line=dict(color='red'))
+    st.plotly_chart(fig)
 
     st.write(f"MAPE: {mape:.2f}%")
