@@ -142,7 +142,7 @@ with tab2:
     O gráfico a seguir mostra a série temporal original e a média móvel de 12 períodos. A média móvel ajuda a suavizar as flutuações de curto prazo e a destacar a tendência de longo prazo.
     """)
     ma = df_ajustado.rolling(12).mean()
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     df_ajustado.plot(ax=ax, legend=False)
     ma.plot(ax=ax, legend=False, color='r')
     ax.set_title("Série Temporal Original e Média Móvel")
@@ -153,7 +153,7 @@ with tab2:
     """)
     df_ajustado_log = np.log(df_ajustado)
     ma_log = df_ajustado_log.rolling(12).mean()
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     df_ajustado_log.plot(ax=ax, legend=False)
     ma_log.plot(ax=ax, legend=False, color='r')
     ax.set_title("Série Log-Transformada e Média Móvel")
@@ -165,7 +165,7 @@ with tab2:
     df_s = (df_ajustado_log - ma_log).dropna()
     ma_s = df_s.rolling(12).mean()
     std = df_s.rolling(12).std()
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     df_s.plot(ax=ax, legend=False)
     ma_s.plot(ax=ax, legend=False, color='r')
     std.plot(ax=ax, legend=False, color='g')
@@ -198,7 +198,7 @@ with tab3:
     st.write("""
     O gráfico a seguir mostra a série temporal diferenciada e a média móvel de 12 períodos. A diferenciação é uma técnica comum para estabilizar a média de uma série temporal, removendo a tendência e a sazonalidade.
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     df_diff.plot(ax=ax, legend=False)
     ma_diff.plot(ax=ax, legend=False, color='r')
     std_diff.plot(ax=ax, legend=False, color='g')
@@ -221,28 +221,28 @@ with tab3:
     st.write("""
     O gráfico de autocorrelação (ACF) nos mostra a correlação da série temporal com seus próprios valores defasados. A ACF é útil para identificar a presença de padrões sazonais e dependências temporais.
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     plot_acf(df_diff.dropna(), ax=ax)
     st.pyplot(fig)
 
     st.write("""
     O gráfico de autocorrelação parcial (PACF) nos mostra a correlação da série temporal com seus próprios valores defasados, removendo o efeito das correlações anteriores. A PACF é útil para identificar a ordem de um modelo autoregressivo (AR).
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     plot_pacf(df_diff.dropna(), ax=ax)
     st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de ACF (autocorrelação) para a série temporal original. Ele nos ajuda a visualizar as correlações ao longo do tempo.
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     plot_acf(df_ajustado.preco_petroleo, ax=ax)
     st.pyplot(fig)
 
     st.write("""
     Abaixo está o gráfico de PACF (autocorrelação parcial) para a série temporal original. Ele nos ajuda a visualizar as correlações parciais ao longo do tempo.
     """)
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     plot_pacf(df_ajustado.preco_petroleo, ax=ax)
     st.pyplot(fig)
 
@@ -272,7 +272,7 @@ with tab4:
     dataFramefuture = modelo.make_future_dataframe(periods=20, freq='M')
     previsao = modelo.predict(dataFramefuture)
 
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     modelo.plot(previsao, ax=ax)
     ax.plot(test_and_val_data['ds'], test_and_val_data['y'], '.r')
     st.pyplot(fig)
@@ -298,7 +298,7 @@ with tab5:
     modelo = ARIMA(df_diff, order=(2, 1, 2))  # (p, d, q)
     resultado_AR = modelo.fit()
 
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    fig, ax = plt.subplots()
     df_diff.plot(ax=ax, label='Valores Diferenciados')
     resultado_AR.fittedvalues.plot(ax=ax, color='red', label='Valores Ajustados pelo Modelo')
     ax.set_title('RSS: %.4f' % sum((resultado_AR.fittedvalues - df_diff['preco_petroleo'])**2))
